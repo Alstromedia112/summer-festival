@@ -1,0 +1,106 @@
+package com.me1q.summerFestival.games.tag.session;
+
+import com.me1q.summerFestival.core.message.MessageBuilder;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+
+public class RecruitSession {
+
+    private final Set<Player> players;
+    private final int gameDuration;
+    private boolean active;
+
+    public RecruitSession(Player starter, int gameDuration) {
+        this.gameDuration = gameDuration;
+        this.players = new HashSet<>();
+        this.active = false;
+        players.add(starter);
+    }
+
+    public void start() {
+        active = true;
+        broadcastRecruitMessage();
+    }
+
+    private void broadcastRecruitMessage() {
+        Component message = MessageBuilder.separator()
+            .append(Component.newline())
+            .append(Component.text("   増え鬼参加者募集中！").color(NamedTextColor.YELLOW)
+                .decorate(net.kyori.adventure.text.format.TextDecoration.BOLD))
+            .append(Component.newline())
+            .append(Component.text("   "))
+            .append(MessageBuilder.clickable("[参加する]", NamedTextColor.GREEN, "/tag join",
+                "クリックして参加"))
+            .append(Component.newline())
+            .append(
+                Component.text("   ゲーム時間: " + gameDuration + "秒").color(NamedTextColor.AQUA))
+            .append(Component.newline())
+            .append(MessageBuilder.separator());
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(message);
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
+        }
+    }
+
+    public void addPlayer(Player player) {
+        if (players.contains(player)) {
+            player.sendMessage(MessageBuilder.warning("すでに参加しています！"));
+            return;
+        }
+
+        players.add(player);
+        player.sendMessage(MessageBuilder.success("増え鬼に参加しました！"));
+        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+
+        broadcastParticipantJoined(player);
+    }
+
+    private void broadcastParticipantJoined(Player player) {
+        Component broadcast = Component.text(player.getName()).color(NamedTextColor.AQUA)
+            .append(Component.text(" が参加しました (").color(NamedTextColor.GRAY))
+            .append(Component.text(players.size()).color(NamedTextColor.YELLOW))
+            .append(Component.text("人)").color(NamedTextColor.GRAY));
+
+        players.forEach(p -> p.sendMessage(broadcast));
+    }
+
+    public void removePlayer(Player player) {
+        players.remove(player);
+    }
+
+    public void cancel() {
+        active = false;
+        broadcastToAll(MessageBuilder.warning("募集をキャンセルしました。"));
+    }
+
+    public void stop() {
+        active = false;
+        broadcastToAll(
+            MessageBuilder.warning("募集を終了しました。参加者: " + players.size() + "人"));
+    }
+
+    private void broadcastToAll(Component message) {
+        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(message));
+    }
+
+    public List<Player> getPlayers() {
+        return new ArrayList<>(players);
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public int getGameDuration() {
+        return gameDuration;
+    }
+}
+

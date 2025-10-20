@@ -1,0 +1,32 @@
+name: SummerFestival
+version: '1.0'
+main: com.me1q.summerFestival.SummerFestival
+api-version: '1.21'
+description: 夏祭りをテーマにしたプラグイン
+authors: [ me1q ]
+website: https://me1q.com
+
+commands:
+  shootinggame:
+    description: Start and Stop the shooting game
+    usage: /<command> <start|stop|status|help>
+    aliases: [ sg ]
+  tag:
+    description: 鬼ごっこゲームを開始・停止する
+    usage: /<command> <start|stop|status>
+    aliases: [ onigokko ]
+  boatrace:
+    description: ボートレースゲームを開始・停止する
+    usage: /<command> <start|stop|help>
+    aliases: [ br ]
+
+permissions:
+  summerfestival.shooting:
+    description: 射的ゲームを使用する権限
+    default: true
+  summerfestival.tag:
+    description: 鬼ごっこゲームを使用する権限
+    default: true
+  summerfestival.boatrace:
+    description: ボートレースゲームを使用する権限
+    default: true

@@ -1,0 +1,69 @@
+# Gradle
+.gradle/
+build/
+
+# Keep the Gradle wrapper jar if present (commit the wrapper jar and properties)
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+
+# Logs and JVM crash / replay logs
+*.log
+hs_err_pid*
+replay_pid*.log
+
+# Build artifacts and generated sources
+target/
+generated/
+
+# Minecraft server runtime directory and its generated content
+/run/
+run/
+run/**
+logs/
+cache/
+plugins/
+versions/
+world/
+world_nether/
+world_the_end/
+
+# Common files from running a server that shouldn't be committed
+server.log
+usercache.json
+banned-players.json
+banned-ips.json
+ops.json
+whitelist.json
+
+# Sensitive / local environment
+.env
+*.keystore
+*.jks
+
+# Misc
+coverage/
