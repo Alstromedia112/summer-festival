@@ -2,7 +2,7 @@ package com.me1q.summerFestival.games.tag;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
-import com.me1q.summerFestival.games.tag.session.RecruitSession;
+import com.me1q.summerFestival.games.tag.session.TagRecruitSession;
 import com.me1q.summerFestival.games.tag.session.TagSession;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -11,15 +11,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class TagGameManager implements Listener {
+public class TagManager implements Listener {
 
     private static final int MIN_PLAYERS = 2;
 
     private final SummerFestival plugin;
     private TagSession activeSession;
-    private RecruitSession recruitSession;
+    private TagRecruitSession recruitSession;
 
-    public TagGameManager(SummerFestival plugin) {
+    public TagManager(SummerFestival plugin) {
         this.plugin = plugin;
     }
 
@@ -34,7 +34,7 @@ public class TagGameManager implements Listener {
             return;
         }
 
-        recruitSession = new RecruitSession(starter, duration);
+        recruitSession = new TagRecruitSession(starter, duration);
         recruitSession.start();
     }
 

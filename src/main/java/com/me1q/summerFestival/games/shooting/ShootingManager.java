@@ -17,7 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class ShootingGameManager implements Listener {
+public class ShootingManager implements Listener {
 
     private static final long ARROW_CLEANUP_DELAY_TICKS = 1L;
 
@@ -26,7 +26,7 @@ public class ShootingGameManager implements Listener {
     private final Map<Player, SpawnArea> playerSpawnAreas;
     private final Map<Player, TargetSpawner> playerSpawners;
 
-    public ShootingGameManager(SummerFestival plugin) {
+    public ShootingManager(SummerFestival plugin) {
         this.plugin = plugin;
         this.activeSessions = new HashMap<>();
         this.playerSpawnAreas = new HashMap<>();

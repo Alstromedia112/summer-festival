@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.boatrace;
+package com.me1q.summerFestival.games.boatrace.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-public class BoatRaceMultiSession {
+public class BoatRaceSession {
 
     private static final int COUNTDOWN_SECONDS = 5;
 
@@ -35,7 +35,7 @@ public class BoatRaceMultiSession {
     private long startTime;
     private BukkitTask countdownTask;
 
-    public BoatRaceMultiSession(SummerFestival plugin, List<Player> participants,
+    public BoatRaceSession(SummerFestival plugin, List<Player> participants,
         List<ArmorStand> goalMarkers, Player organizer, Runnable onComplete) {
         this.plugin = plugin;
         this.participants = new ArrayList<>(participants);

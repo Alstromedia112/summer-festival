@@ -2,6 +2,8 @@ package com.me1q.summerFestival.games.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.games.boatrace.session.BoatRaceRecruitSession;
+import com.me1q.summerFestival.games.boatrace.session.BoatRaceSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,16 +25,16 @@ import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class BoatRaceGame implements Listener {
+public class BoatRaceManager implements Listener {
 
     private final SummerFestival plugin;
     private final Map<UUID, List<ArmorStand>> goalLineMarkers;
 
     // Recruitment and multi-player race sessions
     private BoatRaceRecruitSession activeRecruitSession;
-    private BoatRaceMultiSession activeRaceSession;
+    private BoatRaceSession activeRaceSession;
 
-    public BoatRaceGame(SummerFestival plugin) {
+    public BoatRaceManager(SummerFestival plugin) {
         this.plugin = plugin;
         this.goalLineMarkers = new HashMap<>();
         this.activeRecruitSession = null;
@@ -181,7 +183,7 @@ public class BoatRaceGame implements Listener {
 
         activeRecruitSession.stop();
 
-        activeRaceSession = new BoatRaceMultiSession(
+        activeRaceSession = new BoatRaceSession(
             plugin,
             activeRecruitSession.getParticipants(),
             goalMarkers,

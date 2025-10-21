@@ -15,10 +15,10 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
     private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "getgoal",
         "cleargoal", "help"};
 
-    private final BoatRaceGame gameManager;
+    private final BoatRaceManager gameManager;
 
     public BoatRaceCommand(SummerFestival plugin) {
-        this.gameManager = new BoatRaceGame(plugin);
+        this.gameManager = new BoatRaceManager(plugin);
     }
 
     @Override
@@ -170,7 +170,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         return completions;
     }
 
-    public BoatRaceGame getGameManager() {
+    public BoatRaceManager getGameManager() {
         return gameManager;
     }
 }

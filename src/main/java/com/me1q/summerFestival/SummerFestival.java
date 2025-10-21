@@ -1,7 +1,7 @@
 package com.me1q.summerFestival;
 
 import com.me1q.summerFestival.games.boatrace.BoatRaceCommand;
-import com.me1q.summerFestival.games.shooting.ShootingGameCommand;
+import com.me1q.summerFestival.games.shooting.ShootingCommand;
 import com.me1q.summerFestival.games.tag.TagCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,7 +21,7 @@ public final class SummerFestival extends JavaPlugin {
     }
 
     private void registerShootingGame() {
-        ShootingGameCommand shootingGameCommand = new ShootingGameCommand(this);
+        ShootingCommand shootingGameCommand = new ShootingCommand(this);
         getCommand("shootinggame").setExecutor(shootingGameCommand);
         getCommand("shootinggame").setTabCompleter(shootingGameCommand);
         getServer().getPluginManager().registerEvents(shootingGameCommand.getGameManager(), this);

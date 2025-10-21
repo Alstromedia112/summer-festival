@@ -15,15 +15,15 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
 
-public class ShootingGameCommand implements CommandExecutor, TabCompleter {
+public class ShootingCommand implements CommandExecutor, TabCompleter {
 
     private static final int REQUIRED_COORDINATE_ARGS = 7;
     private static final String[] SUB_COMMANDS = {"start", "stop", "status", "help"};
 
-    private final ShootingGameManager gameManager;
+    private final ShootingManager gameManager;
 
-    public ShootingGameCommand(SummerFestival plugin) {
-        this.gameManager = new ShootingGameManager(plugin);
+    public ShootingCommand(SummerFestival plugin) {
+        this.gameManager = new ShootingManager(plugin);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class ShootingGameCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
-    public ShootingGameManager getGameManager() {
+    public ShootingManager getGameManager() {
         return gameManager;
     }
 }

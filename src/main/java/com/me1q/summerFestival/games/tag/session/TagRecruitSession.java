@@ -11,13 +11,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-public class RecruitSession {
+public class TagRecruitSession {
 
     private final Set<Player> players;
     private final int gameDuration;
     private boolean active;
 
-    public RecruitSession(Player starter, int gameDuration) {
+    public TagRecruitSession(Player starter, int gameDuration) {
         this.gameDuration = gameDuration;
         this.players = new HashSet<>();
         this.active = false;

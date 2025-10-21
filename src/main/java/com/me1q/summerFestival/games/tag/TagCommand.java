@@ -19,10 +19,10 @@ public class TagCommand implements CommandExecutor, TabCompleter {
 
     private static final int MIN_DURATION = 30;
 
-    private final TagGameManager gameManager;
+    private final TagManager gameManager;
 
     public TagCommand(SummerFestival plugin) {
-        this.gameManager = new TagGameManager(plugin);
+        this.gameManager = new TagManager(plugin);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         return completions;
     }
 
-    public TagGameManager getGameManager() {
+    public TagManager getGameManager() {
         return gameManager;
     }
 }

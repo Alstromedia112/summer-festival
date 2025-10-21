@@ -36,7 +36,7 @@ public final class Equipment {
     }
 
     public static void clearInventory(Player player) {
-        player.getInventory().setHelmet(null);
+        player.getInventory().setHelmet(ItemStack.empty());
     }
 }
 

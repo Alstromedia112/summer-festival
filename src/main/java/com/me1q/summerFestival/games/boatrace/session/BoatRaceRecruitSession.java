@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.boatrace;
+package com.me1q.summerFestival.games.boatrace.session;
 
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import java.util.ArrayList;
@@ -16,14 +16,12 @@ public class BoatRaceRecruitSession {
     private final Player organizer;
     private final Set<Player> participants;
     private final int maxPlayers;
-    private final boolean organizerParticipates;
     private boolean active;
 
     public BoatRaceRecruitSession(Player organizer, int maxPlayers, boolean organizerParticipates) {
         this.organizer = organizer;
         this.participants = new HashSet<>();
         this.maxPlayers = maxPlayers;
-        this.organizerParticipates = organizerParticipates;
         this.active = false;
 
         if (organizerParticipates) {
@@ -56,16 +54,16 @@ public class BoatRaceRecruitSession {
         }
     }
 
-    public boolean addPlayer(Player player) {
+    public void addPlayer(Player player) {
         if (participants.contains(player)) {
             player.sendMessage(MessageBuilder.warning("すでに参加しています！"));
-            return false;
+            return;
         }
 
         if (participants.size() >= maxPlayers) {
             player.sendMessage(
                 MessageBuilder.error("定員に達しています（最大" + maxPlayers + "人）"));
-            return false;
+            return;
         }
 
         participants.add(player);
@@ -73,7 +71,6 @@ public class BoatRaceRecruitSession {
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
         broadcastParticipantJoined(player);
-        return true;
     }
 
     private void broadcastParticipantJoined(Player player) {
@@ -83,10 +80,6 @@ public class BoatRaceRecruitSession {
             .append(Component.text("/" + maxPlayers + "人)").color(NamedTextColor.GRAY));
 
         participants.forEach(p -> p.sendMessage(broadcast));
-    }
-
-    public void removePlayer(Player player) {
-        participants.remove(player);
     }
 
     public void cancel() {

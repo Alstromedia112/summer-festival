@@ -7,26 +7,25 @@ authors: [ me1q ]
 website: https://me1q.com
 
 commands:
-  shootinggame:
-    description: Start and Stop the shooting game
+  shooting:
+    description: Manage shooting game
     usage: /<command> <start|stop|status|help>
     aliases: [ sg ]
   tag:
-    description: 鬼ごっこゲームを開始・停止する
-    usage: /<command> <start|stop|status>
-    aliases: [ onigokko ]
+    description: Manage tag game
+    usage: /<command> <start|stop|status|recruit|>
   boatrace:
-    description: ボートレースゲームを開始・停止する
+    description: Manage boat racing game
     usage: /<command> <start|stop|help>
     aliases: [ br ]
 
 permissions:
   summerfestival.shooting:
-    description: 射的ゲームを使用する権限
+    description: Permission to use shooting game
     default: true
   summerfestival.tag:
-    description: 鬼ごっこゲームを使用する権限
+    description: Permission to use tag game
     default: true
   summerfestival.boatrace:
-    description: ボートレースゲームを使用する権限
+    description: Permission to use boat racing game
     default: true
