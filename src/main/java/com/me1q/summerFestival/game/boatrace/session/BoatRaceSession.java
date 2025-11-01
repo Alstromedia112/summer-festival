@@ -131,50 +131,6 @@ public class BoatRaceSession {
         }
     }
 
-    public void playerReachGoal(Player player) {
-        if (!raceStarted || finishTimes.containsKey(player)) {
-            return;
-        }
-
-        long finishTime = System.currentTimeMillis();
-        double timeSeconds = (finishTime - startTime) / 1000.0;
-
-        finishTimes.put(player, finishTime);
-        rankings.add(player);
-
-        int rank = rankings.size();
-
-        // Show rank to the player
-        Title title = Title.title(
-            Component.text(getRankText(rank) + "位!").color(getRankColor(rank)),
-            Component.text(String.format("タイム: %.2f秒", timeSeconds)),
-            Times.times(Duration.ofMillis(500), Duration.ofSeconds(2), Duration.ofMillis(500))
-        );
-        player.showTitle(title);
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-
-        // Broadcast to all participants
-        Component announcement = Component.text(player.getName()).color(NamedTextColor.AQUA)
-            .append(Component.text(" が").color(NamedTextColor.GRAY))
-            .append(Component.text(getRankText(rank) + "位").color(getRankColor(rank)))
-            .append(Component.text("でゴール！ (").color(NamedTextColor.GRAY))
-            .append(
-                Component.text(String.format("%.2f秒", timeSeconds)).color(NamedTextColor.YELLOW))
-            .append(Component.text(")").color(NamedTextColor.GRAY));
-
-        broadcastToParticipants(announcement);
-
-        // Check if all players finished
-        if (rankings.size() == participants.size()) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    stop();
-                }
-            }.runTaskLater(plugin, 60L); // Wait 3 seconds before showing final results
-        }
-    }
-
     private void showFinalResults() {
         broadcastToParticipants(MessageBuilder.separator());
         broadcastToParticipants(Component.text("   レース結果").color(NamedTextColor.GOLD)
