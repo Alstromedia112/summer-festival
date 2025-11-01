@@ -1,7 +1,7 @@
-package com.me1q.summerFestival.games.shooting.spawner;
+package com.me1q.summerFestival.game.shooting.spawner;
 
 import com.me1q.summerFestival.SummerFestival;
-import com.me1q.summerFestival.games.shooting.target.ShootingTarget;
+import com.me1q.summerFestival.game.shooting.target.ShootingTarget;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;

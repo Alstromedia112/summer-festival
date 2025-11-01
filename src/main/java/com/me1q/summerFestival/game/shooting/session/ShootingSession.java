@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.shooting.session;
+package com.me1q.summerFestival.game.shooting.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;

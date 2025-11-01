@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.boatrace.session;
+package com.me1q.summerFestival.game.boatrace.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
@@ -12,7 +12,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Sound;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -22,7 +21,6 @@ public class BoatRaceSession {
     private static final int COUNTDOWN_SECONDS = 5;
 
     private final SummerFestival plugin;
-    private final List<ArmorStand> goalMarkers;
     private final List<Player> participants;
     private final Player organizer;
     private final Runnable onComplete;
@@ -36,10 +34,9 @@ public class BoatRaceSession {
     private BukkitTask countdownTask;
 
     public BoatRaceSession(SummerFestival plugin, List<Player> participants,
-        List<ArmorStand> goalMarkers, Player organizer, Runnable onComplete) {
+        Player organizer, Runnable onComplete) {
         this.plugin = plugin;
         this.participants = new ArrayList<>(participants);
-        this.goalMarkers = new ArrayList<>(goalMarkers);
         this.organizer = organizer;
         this.onComplete = onComplete;
         this.finishTimes = new HashMap<>();
@@ -236,18 +233,10 @@ public class BoatRaceSession {
     }
 
     public boolean isParticipant(Player player) {
-        return participants.contains(player);
+        return !participants.contains(player);
     }
 
     public boolean isOrganizer(Player player) {
         return organizer.equals(player);
-    }
-
-    public boolean isGoalMarker(ArmorStand armorStand) {
-        return goalMarkers.contains(armorStand);
-    }
-
-    public List<Player> getParticipants() {
-        return new ArrayList<>(participants);
     }
 }

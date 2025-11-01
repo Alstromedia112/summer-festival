@@ -1,9 +1,10 @@
-package com.me1q.summerFestival.games.tag;
+package com.me1q.summerFestival.game.tag;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.tag.item.SlownessPotion;
+import com.me1q.summerFestival.game.tag.item.SpeedPotion;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,11 +14,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class TagCommand implements CommandExecutor, TabCompleter {
 
     private static final int MIN_DURATION = 30;
+
+    private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "help"};
 
     private final TagManager gameManager;
 
@@ -81,7 +83,7 @@ public class TagCommand implements CommandExecutor, TabCompleter {
     private void sendUsage(Player player) {
         player.sendMessage(MessageBuilder.header("増え鬼"));
         player.sendMessage(
-            Component.text("/tag recruit <時間> - 参加者を募集").color(NamedTextColor.YELLOW));
+            Component.text("/tag recruit <time> - 参加者を募集").color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text("/tag recruit cancel - 募集をキャンセル").color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/tag join - 募集に参加").color(NamedTextColor.YELLOW));
@@ -89,27 +91,46 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             Component.text("/tag start - 増え鬼を開始").color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text("/tag stop - 増え鬼を終了").color(NamedTextColor.YELLOW));
-        player.sendMessage(
-            Component.text("/tag status - ゲームの状態を確認").color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text(""));
         player.sendMessage(Component.text("ルール:").color(NamedTextColor.AQUA));
         player.sendMessage(
-            Component.text("- 鬼が逃げる側を殴るとタッチ成功").color(NamedTextColor.WHITE));
+            Component.text("- 鬼が逃げ側を殴ると捕まえられる").color(NamedTextColor.WHITE));
         player.sendMessage(
-            Component.text("- タッチされた人は鬼になります（増え鬼）").color(NamedTextColor.WHITE));
+            Component.text("- 捕まった人は鬼になります").color(NamedTextColor.WHITE));
         player.sendMessage(Component.text("- 時間内に全員鬼にならなければ逃げ側の勝ち")
             .color(NamedTextColor.WHITE));
+
+        player.getInventory().addItem(SpeedPotion.createItem());
+        player.getInventory().addItem(SlownessPotion.createItem());
+
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender,
+    public List<String> onTabComplete(@NotNull CommandSender sender,
         @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!(sender instanceof Player)) {
+            return null;
+        }
+
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            completions.addAll(Arrays.asList("recruit", "join", "start", "stop", "status"));
+            for (String subCommand : SUB_COMMANDS) {
+                if (subCommand.startsWith(args[0].toLowerCase())) {
+                    completions.add(subCommand);
+                }
+            }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("recruit")) {
-            completions.addAll(Arrays.asList("cancel", "60", "120", "300", "600"));
+            if ("cancel".startsWith(args[1].toLowerCase())) {
+                completions.add("cancel");
+
+                String[] commonDurations = {"300", "600"};
+                for (String duration : commonDurations) {
+                    if (duration.startsWith(args[1])) {
+                        completions.add(duration);
+                    }
+                }
+            }
         }
 
         return completions;

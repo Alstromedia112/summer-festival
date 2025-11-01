@@ -1,9 +1,9 @@
-package com.me1q.summerFestival.games.tag;
+package com.me1q.summerFestival.game.tag;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
-import com.me1q.summerFestival.games.tag.session.TagRecruitSession;
-import com.me1q.summerFestival.games.tag.session.TagSession;
+import com.me1q.summerFestival.game.tag.session.TagRecruitSession;
+import com.me1q.summerFestival.game.tag.session.TagSession;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

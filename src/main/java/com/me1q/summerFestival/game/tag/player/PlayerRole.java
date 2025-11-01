@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.tag.player;
+package com.me1q.summerFestival.game.tag.player;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 

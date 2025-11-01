@@ -1,14 +1,17 @@
-package com.me1q.summerFestival.games.boatrace;
+package com.me1q.summerFestival.game.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
@@ -22,7 +25,8 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
+        @NotNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(MessageBuilder.error("このコマンドはプレイヤーのみ実行できます。"));
             return true;
@@ -111,30 +115,27 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
     }
 
     private void showHelp(Player player) {
-        player.sendMessage(MessageBuilder.header("ボートレース コマンド"));
-        player.sendMessage("§e/boatrace getgoal");
-        player.sendMessage("§7  - ゴールマーカー（スポーンエッグ）を取得");
-        player.sendMessage("§7    右クリックでゴール地点を設置");
-        player.sendMessage("§e/boatrace cleargoal");
-        player.sendMessage("§7  - すべてのゴール地点を削除");
-        player.sendMessage("§e/boatrace recruit [人数] [true/false]");
-        player.sendMessage("§7  - レース参加者を募集");
-        player.sendMessage("§7    [人数]: 定員（省略時: 10人）");
-        player.sendMessage("§7    [true/false]: 自分も参加するか（省略時: true）");
-        player.sendMessage("§e/boatrace recruit cancel");
-        player.sendMessage("§7  - 募集をキャンセル");
-        player.sendMessage("§e/boatrace join");
-        player.sendMessage("§7  - 募集中のレースに参加");
-        player.sendMessage("§e/boatrace start");
-        player.sendMessage("§7  - レースを開始（募集した人のみ）");
-        player.sendMessage("§e/boatrace stop");
-        player.sendMessage("§7  - レースを終了");
-        player.sendMessage("§e/boatrace help");
-        player.sendMessage("§7  - ヘルプを表示");
+        player.sendMessage(MessageBuilder.header("ボートレース"));
+        player.sendMessage(Component.text("/boatrace getgoal - ゴールマーカーを取得")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace cleargoal - すべてのゴールマーカーを削除")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(
+            Component.text("/boatrace recruit <people> <true/false> - レース参加者を募集")
+                .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace recruit cancel - 募集をキャンセル")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(
+            Component.text("/boatrace join - 募集中のレースに参加").color(NamedTextColor.YELLOW));
+        player.sendMessage(
+            Component.text("/boatrace start - レースを開始").color(NamedTextColor.YELLOW));
+        player.sendMessage(
+            Component.text("/boatrace stop - レースを終了").color(NamedTextColor.YELLOW));
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+        @NotNull String alias,
         String[] args) {
         List<String> completions = new ArrayList<>();
 

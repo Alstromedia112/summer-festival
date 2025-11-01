@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.tag.session;
+package com.me1q.summerFestival.game.tag.session;
 
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import java.util.ArrayList;

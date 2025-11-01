@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.boatrace.session;
+package com.me1q.summerFestival.game.boatrace.session;
 
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import java.util.ArrayList;

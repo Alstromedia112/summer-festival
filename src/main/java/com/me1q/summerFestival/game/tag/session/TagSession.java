@@ -1,9 +1,9 @@
-package com.me1q.summerFestival.games.tag.session;
+package com.me1q.summerFestival.game.tag.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
-import com.me1q.summerFestival.games.tag.player.Equipment;
-import com.me1q.summerFestival.games.tag.player.PlayerRole;
+import com.me1q.summerFestival.game.tag.player.Equipment;
+import com.me1q.summerFestival.game.tag.player.PlayerRole;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +50,7 @@ public class TagSession {
 
     private void initializeRoles(List<Player> players) {
         Collections.shuffle(players);
-        Player firstTagger = players.get(0);
+        Player firstTagger = players.getFirst();
 
         taggers.add(firstTagger);
         playerRoles.put(firstTagger, PlayerRole.TAGGER);

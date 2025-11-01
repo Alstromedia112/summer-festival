@@ -1,11 +1,11 @@
-package com.me1q.summerFestival.games.shooting;
+package com.me1q.summerFestival.game.shooting;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
-import com.me1q.summerFestival.games.shooting.session.ShootingSession;
-import com.me1q.summerFestival.games.shooting.spawner.SpawnArea;
-import com.me1q.summerFestival.games.shooting.spawner.TargetSpawner;
-import com.me1q.summerFestival.games.shooting.target.ShootingTarget;
+import com.me1q.summerFestival.game.shooting.session.ShootingSession;
+import com.me1q.summerFestival.game.shooting.spawner.SpawnArea;
+import com.me1q.summerFestival.game.shooting.spawner.TargetSpawner;
+import com.me1q.summerFestival.game.shooting.target.ShootingTarget;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,13 +23,11 @@ public class ShootingManager implements Listener {
 
     private final SummerFestival plugin;
     private final Map<Player, ShootingSession> activeSessions;
-    private final Map<Player, SpawnArea> playerSpawnAreas;
     private final Map<Player, TargetSpawner> playerSpawners;
 
     public ShootingManager(SummerFestival plugin) {
         this.plugin = plugin;
         this.activeSessions = new HashMap<>();
-        this.playerSpawnAreas = new HashMap<>();
         this.playerSpawners = new HashMap<>();
     }
 
@@ -41,7 +39,6 @@ public class ShootingManager implements Listener {
         }
 
         SpawnArea spawnArea = new SpawnArea(x, y, z, dx, dy, dz);
-        playerSpawnAreas.put(player, spawnArea);
 
         TargetSpawner spawner = new TargetSpawner(plugin);
         playerSpawners.put(player, spawner);
@@ -110,7 +107,6 @@ public class ShootingManager implements Listener {
 
     private void cleanupPlayerSession(Player player) {
         activeSessions.remove(player);
-        playerSpawnAreas.remove(player);
 
         TargetSpawner spawner = playerSpawners.remove(player);
         if (spawner != null) {

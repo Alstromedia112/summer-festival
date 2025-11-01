@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.shooting;
+package com.me1q.summerFestival.game.shooting;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
+import org.jetbrains.annotations.NotNull;
 
 public class ShootingCommand implements CommandExecutor, TabCompleter {
 
@@ -27,7 +28,8 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
+        @NotNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(
                 MessageBuilder.error("This command can only be executed by the player."));
@@ -56,7 +58,7 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     private void handleStartCommand(Player player, String[] args) {
         if (gameManager.isPlayerInGame(player)) {
             player.sendMessage(MessageBuilder.error("You are already in the game."));
-            player.sendMessage(MessageBuilder.warning("End the game with: /shootinggame stop"));
+            player.sendMessage(MessageBuilder.warning("End the game with: /shooting stop"));
             return;
         }
 
@@ -87,8 +89,8 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     private void showStartUsage(Player player) {
         player.sendMessage(MessageBuilder.error("座標範囲を指定してください"));
         player.sendMessage(
-            MessageBuilder.warning("Usage: /shootinggame start <x> <y> <z> <dx> <dy> <dz>"));
-        player.sendMessage(Component.text("Example: /shootinggame start 100 64 100 200 80 200")
+            MessageBuilder.warning("Usage: /shooting start <x> <y> <z> <dx> <dy> <dz>"));
+        player.sendMessage(Component.text("Example: /shooting start 100 64 100 200 80 200")
             .color(NamedTextColor.GRAY));
     }
 
@@ -111,22 +113,21 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     }
 
     private void showHelp(Player player) {
-        player.sendMessage(MessageBuilder.header("射的ゲーム ヘルプ"));
+        player.sendMessage(MessageBuilder.header("射的"));
         player.sendMessage(
-            MessageBuilder.info("/shootinggame start <x> <y> <z> <dx> <dy> <dz> - ゲームを開始"));
-        player.sendMessage(MessageBuilder.info("/shootinggame stop - ゲームを終了"));
-        player.sendMessage(MessageBuilder.info("/shootinggame status - 現在の状況を確認"));
-        player.sendMessage(MessageBuilder.info("/shootinggame help - このヘルプを表示"));
+            MessageBuilder.info("/shooting start <x> <y> <z> <dx> <dy> <dz> - ゲームを開始"));
+        player.sendMessage(MessageBuilder.info("/shooting stop - ゲームを終了"));
+        player.sendMessage(MessageBuilder.info("/shooting status - 現在の状況を確認"));
         player.sendMessage(Component.text(""));
 
         player.sendMessage(Component.text("座標範囲の指定:").color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("• 的が出現する範囲を2つの座標で指定してください")
             .color(NamedTextColor.WHITE));
-        player.sendMessage(Component.text("• 例: /shootinggame start 100 64 100 200 80 200")
+        player.sendMessage(Component.text("• 例: /shooting start 100 64 100 200 80 200")
             .color(NamedTextColor.GRAY));
         player.sendMessage(Component.text(""));
 
-        player.sendMessage(Component.text("ゲームルール:").color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("ルール:").color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text("• 30秒間でできるだけ多くの的を射抜こう").color(NamedTextColor.WHITE));
         player.sendMessage(Component.text("• 白: 1ポイント").color(NamedTextColor.WHITE));
@@ -138,7 +139,8 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label,
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+        @NotNull String label,
         String[] args) {
         if (!(sender instanceof Player player)) {
             return null;

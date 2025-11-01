@@ -1,4 +1,4 @@
-package com.me1q.summerFestival.games.shooting.spawner;
+package com.me1q.summerFestival.game.shooting.spawner;
 
 import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.Location;
