@@ -3,6 +3,7 @@ package com.me1q.summerFestival.game.tag;
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
+import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.SpeedPotion;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +103,7 @@ public class TagCommand implements CommandExecutor, TabCompleter {
 
         player.getInventory().addItem(SpeedPotion.createItem());
         player.getInventory().addItem(SlownessPotion.createItem());
-
+        player.getInventory().addItem(new SmokeLauncher().createItem());
     }
 
     @Override
