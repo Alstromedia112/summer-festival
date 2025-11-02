@@ -1,6 +1,8 @@
 package com.me1q.summerFestival.game.boatrace.session;
 
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.constants.Message;
+import com.me1q.summerFestival.game.boatrace.constants.Messages;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,13 +58,13 @@ public class BoatRaceRecruitSession {
 
     public void addPlayer(Player player) {
         if (participants.contains(player)) {
-            player.sendMessage(MessageBuilder.warning("すでに参加しています！"));
+            player.sendMessage(MessageBuilder.warning(Message.ALREADY_JOINED.text()));
             return;
         }
 
         if (participants.size() >= maxPlayers) {
             player.sendMessage(
-                MessageBuilder.error("定員に達しています（最大" + maxPlayers + "人）"));
+                MessageBuilder.error(Messages.maxPlayersReached(maxPlayers)));
             return;
         }
 
@@ -84,13 +86,14 @@ public class BoatRaceRecruitSession {
 
     public void cancel() {
         active = false;
-        broadcastToAll(MessageBuilder.warning("募集がキャンセルされました。"));
+        broadcastToAll(MessageBuilder.warning(Message.RECRUITMENT_CANCELLED.text()));
     }
 
     public void stop() {
         active = false;
         broadcastToAll(
-            MessageBuilder.warning("募集を終了しました。参加者: " + participants.size() + "人"));
+            MessageBuilder.warning(
+                Messages.recruitmentStopped(participants.size())));
     }
 
     private void broadcastToAll(Component message) {

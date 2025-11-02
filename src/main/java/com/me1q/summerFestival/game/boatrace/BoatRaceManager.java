@@ -2,163 +2,66 @@ package com.me1q.summerFestival.game.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.constants.Message;
+import com.me1q.summerFestival.game.boatrace.constants.Messages;
+import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager;
+import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager.GoalLine;
+import com.me1q.summerFestival.game.boatrace.goal.GoalMarkerItem;
+import com.me1q.summerFestival.game.boatrace.listener.GoalMarkerListener;
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceRecruitSession;
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceSession;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Boat;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.vehicle.VehicleMoveEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-public class BoatRaceManager implements Listener {
-
-    // Helper class to represent a goal line pair
-    public static class GoalLine {
-
-        private final ArmorStand marker1;
-        private final ArmorStand marker2;
-
-        public GoalLine(ArmorStand marker1, ArmorStand marker2) {
-            this.marker1 = marker1;
-            this.marker2 = marker2;
-        }
-
-        public boolean isValid() {
-            return marker1 != null && !marker1.isDead() && marker2 != null && !marker2.isDead();
-        }
-    }
+public class BoatRaceManager {
 
     private final SummerFestival plugin;
-    private final Map<UUID, List<ArmorStand>> goalLineMarkers;
-    private final Map<UUID, GoalLine> playerGoalLines;
+    private final GoalLineManager goalLineManager;
 
-    // Recruitment and multi-player race sessions
     private BoatRaceRecruitSession activeRecruitSession;
     private BoatRaceSession activeRaceSession;
 
     public BoatRaceManager(SummerFestival plugin) {
         this.plugin = plugin;
-        this.goalLineMarkers = new HashMap<>();
-        this.playerGoalLines = new HashMap<>();
+        this.goalLineManager = new GoalLineManager(plugin);
         this.activeRecruitSession = null;
         this.activeRaceSession = null;
+
+        registerListeners();
     }
 
-    // Load existing goal markers from the world
+    private void registerListeners() {
+        Bukkit.getPluginManager().registerEvents(
+            new GoalMarkerListener(goalLineManager), plugin);
+    }
+
     public void loadExistingGoalMarkers() {
-        org.bukkit.NamespacedKey ownerKey = new org.bukkit.NamespacedKey(plugin,
-            "boatrace_goal_owner");
-        int loadedCount = 0;
-
-        for (org.bukkit.World world : plugin.getServer().getWorlds()) {
-            for (ArmorStand armorStand : world.getEntitiesByClass(ArmorStand.class)) {
-                // Check if this is a goal marker
-                if (armorStand.customName() == null || armorStand.isVisible()
-                    || !armorStand.isGlowing()) {
-                    continue;
-                }
-
-                String name = String.valueOf(armorStand.customName());
-
-                if (!"§e§lゴール地点".equals(name)) {
-                    continue;
-                }
-
-                // This is a goal marker - try to get the owner UUID
-                String ownerUuidString = armorStand.getPersistentDataContainer()
-                    .get(ownerKey, org.bukkit.persistence.PersistentDataType.STRING);
-
-                if (ownerUuidString != null) {
-                    try {
-                        UUID ownerUuid = UUID.fromString(ownerUuidString);
-                        goalLineMarkers.computeIfAbsent(ownerUuid, k -> new ArrayList<>())
-                            .add(armorStand);
-                        loadedCount++;
-
-                        plugin.getLogger().info("Loaded goal marker at " +
-                            armorStand.getLocation().getBlockX() + ", " +
-                            armorStand.getLocation().getBlockY() + ", " +
-                            armorStand.getLocation().getBlockZ() +
-                            " (Owner: " + ownerUuidString + ")");
-                    } catch (IllegalArgumentException e) {
-                        plugin.getLogger()
-                            .warning("Invalid UUID in goal marker: " + ownerUuidString);
-                    }
-                } else {
-                    plugin.getLogger().warning("Found goal marker without owner data at " +
-                        armorStand.getLocation().getBlockX() + ", " +
-                        armorStand.getLocation().getBlockY() + ", " +
-                        armorStand.getLocation().getBlockZ());
-                }
-            }
-        }
-
-        if (loadedCount > 0) {
-            plugin.getLogger().info("Loaded " + loadedCount + " goal marker(s) from the world");
-        }
-
-        // Reconstruct goal line pairs
-        for (Map.Entry<UUID, List<ArmorStand>> entry : goalLineMarkers.entrySet()) {
-            UUID ownerUuid = entry.getKey();
-            List<ArmorStand> markers = entry.getValue();
-
-            if (markers.size() == 2) {
-                playerGoalLines.put(ownerUuid, new GoalLine(markers.get(0), markers.get(1)));
-                plugin.getLogger().info("Reconstructed goal line for player " + ownerUuid);
-            } else if (markers.size() > 2) {
-                plugin.getLogger().warning("Player " + ownerUuid + " has " + markers.size() +
-                    " markers (expected 2). Creating goal line with first 2 markers.");
-                playerGoalLines.put(ownerUuid, new GoalLine(markers.get(0), markers.get(1)));
-            }
-        }
+        goalLineManager.loadExistingGoalMarkers();
     }
 
-    // Recruitment methods
     public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates) {
-        if (activeRecruitSession != null && activeRecruitSession.isActive()) {
-            organizer.sendMessage(MessageBuilder.error("すでに募集中です"));
+        if (isRecruitmentActive()) {
+            organizer.sendMessage(
+                MessageBuilder.error(Message.ALREADY_RECRUITING.text()));
             return;
         }
 
-        if (activeRaceSession != null && activeRaceSession.isActive()) {
-            organizer.sendMessage(MessageBuilder.error("レースが進行中です"));
+        if (isRaceActive()) {
+            organizer.sendMessage(
+                MessageBuilder.error(Message.RACE_IN_PROGRESS.text()));
             return;
         }
 
-        if (hasGoalLine(organizer)) {
-            organizer.sendMessage(MessageBuilder.error("ゴール地点を設定してください"));
+        if (!RecruitmentValidator.validateGoalLine(organizer, goalLineManager)) {
             return;
         }
 
-        if (maxPlayers < 2) {
-            organizer.sendMessage(MessageBuilder.error("定員は2人以上にしてください"));
+        if (!RecruitmentValidator.validateMaxPlayers(organizer, maxPlayers)) {
             return;
         }
 
-        if (maxPlayers > 20) {
-            organizer.sendMessage(MessageBuilder.error("定員は20人以下にしてください"));
-            return;
-        }
-
-        String participationMsg =
-            organizerParticipates ? "（参加）" : "（不参加）";
         organizer.sendMessage(MessageBuilder.success(
-            "[BoatRace] 定員: " + maxPlayers + "人 " + participationMsg));
+            Messages.recruitmentStarted(maxPlayers, organizerParticipates)));
 
         activeRecruitSession = new BoatRaceRecruitSession(organizer, maxPlayers,
             organizerParticipates);
@@ -166,8 +69,9 @@ public class BoatRaceManager implements Listener {
     }
 
     public void joinRecruit(Player player) {
-        if (activeRecruitSession == null || !activeRecruitSession.isActive()) {
-            player.sendMessage(MessageBuilder.error("現在募集していません"));
+        if (!isRecruitmentActive()) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NO_RECRUITMENT.text()));
             return;
         }
 
@@ -175,14 +79,15 @@ public class BoatRaceManager implements Listener {
     }
 
     public void cancelRecruit(Player player) {
-        if (activeRecruitSession == null || !activeRecruitSession.isActive()) {
-            player.sendMessage(MessageBuilder.error("募集していません"));
+        if (!isRecruitmentActive()) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NOT_RECRUITING.text()));
             return;
         }
 
-        if (!activeRecruitSession.getOrganizer().equals(player)) {
-            player.sendMessage(
-                MessageBuilder.error("募集を開始したプレイヤーのみキャンセルできます"));
+        if (!isOrganizer(player, activeRecruitSession.getOrganizer())) {
+            player.sendMessage(MessageBuilder.error(
+                Message.ONLY_ORGANIZER_CAN_CANCEL.text()));
             return;
         }
 
@@ -191,25 +96,25 @@ public class BoatRaceManager implements Listener {
     }
 
     public void startRace(Player organizer) {
-        if (activeRecruitSession == null || !activeRecruitSession.isActive()) {
-            organizer.sendMessage(MessageBuilder.error("募集を開始してください"));
-            return;
-        }
-
-        if (!activeRecruitSession.getOrganizer().equals(organizer)) {
+        if (!isRecruitmentActive()) {
             organizer.sendMessage(
-                MessageBuilder.error("募集を開始したプレイヤーのみレースを開始できます"));
+                MessageBuilder.error(Message.START_RECRUITMENT_FIRST.text()));
             return;
         }
 
-        if (activeRecruitSession.getParticipantCount() < 2) {
-            organizer.sendMessage(MessageBuilder.error("参加者が2人以上必要です"));
+        if (!isOrganizer(organizer, activeRecruitSession.getOrganizer())) {
+            organizer.sendMessage(MessageBuilder.error(
+                Message.ONLY_ORGANIZER_CAN_START.text()));
             return;
         }
 
-        GoalLine goalLine = playerGoalLines.get(organizer.getUniqueId());
-        if (goalLine == null || !goalLine.isValid()) {
-            organizer.sendMessage(MessageBuilder.error("ゴール地点が設定されていません"));
+        if (!RecruitmentValidator.validateMinParticipants(organizer,
+            activeRecruitSession.getParticipantCount())) {
+            return;
+        }
+
+        GoalLine goalLine = goalLineManager.getGoalLine(organizer);
+        if (!isGoalLineValid(organizer, goalLine)) {
             return;
         }
 
@@ -219,6 +124,7 @@ public class BoatRaceManager implements Listener {
             plugin,
             activeRecruitSession.getParticipants(),
             organizer,
+            goalLine,
             this::cleanupRaceSession
         );
 
@@ -227,14 +133,15 @@ public class BoatRaceManager implements Listener {
     }
 
     public void stopRace(Player player) {
-        if (activeRaceSession == null || !activeRaceSession.isActive()) {
-            player.sendMessage(MessageBuilder.error("レースが進行していません"));
+        if (!isRaceActive()) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NO_RACE_IN_PROGRESS.text()));
             return;
         }
 
-        // Allow both participants and the organizer to stop the race
-        if (activeRaceSession.isParticipant(player) && !activeRaceSession.isOrganizer(player)) {
-            player.sendMessage(MessageBuilder.error("レースに参加していないため、停止できません"));
+        if (!canStopRace(player)) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NOT_PARTICIPANT.text()));
             return;
         }
 
@@ -245,167 +152,48 @@ public class BoatRaceManager implements Listener {
         activeRaceSession = null;
     }
 
-    // Marker management methods
     public void giveGoalMarkerEgg(Player player) {
-        ItemStack egg = new ItemStack(Material.ARMOR_STAND);
-        ItemMeta meta = egg.getItemMeta();
-        meta.displayName(Component.text("§e§lゴールマーカー"));
-        meta.lore(List.of(Component.text("§7右クリックでゴール地点を設置")));
-        egg.setItemMeta(meta);
-        player.getInventory().addItem(egg);
-        player.sendMessage(MessageBuilder.success("ゴールマーカーを入手しました"));
+        player.getInventory().addItem(GoalMarkerItem.create());
+        player.sendMessage(
+            MessageBuilder.success(Message.GOAL_MARKER_OBTAINED.text()));
     }
 
     public void clearGoalLines(Player player) {
-        List<ArmorStand> markers = goalLineMarkers.remove(player.getUniqueId());
-        if (markers != null) {
-            for (ArmorStand marker : markers) {
-                if (marker != null && !marker.isDead()) {
-                    marker.remove();
-                }
-            }
-        }
-        playerGoalLines.remove(player.getUniqueId());
-    }
-
-    private ArmorStand createMarker(Location location, Player owner) {
-        ArmorStand marker = (ArmorStand) location.getWorld()
-            .spawnEntity(location, EntityType.ARMOR_STAND);
-        marker.setVisible(false);
-        marker.setGravity(false);
-        marker.setInvulnerable(true);
-        marker.customName(Component.text("§e§lゴール地点"));
-        marker.setCustomNameVisible(true);
-        marker.setMarker(true);
-        marker.setGlowing(true);
-
-        // Store owner UUID in persistent data
-        org.bukkit.NamespacedKey ownerKey = new org.bukkit.NamespacedKey(plugin,
-            "boatrace_goal_owner");
-        marker.getPersistentDataContainer().set(ownerKey,
-            org.bukkit.persistence.PersistentDataType.STRING,
-            owner.getUniqueId().toString());
-
-        return marker;
+        goalLineManager.clearGoalLines(player);
     }
 
     public boolean hasGoalLine(Player player) {
-        GoalLine goalLine = playerGoalLines.get(player.getUniqueId());
-        return goalLine == null || !goalLine.isValid();
+        return goalLineManager.hasGoalLine(player);
     }
 
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        ItemStack item = event.getItem();
+    private boolean isRecruitmentActive() {
+        return activeRecruitSession != null && activeRecruitSession.isActive();
+    }
 
-        if (item == null || item.getType() != Material.ARMOR_STAND) {
-            return;
-        }
+    private boolean isRaceActive() {
+        return activeRaceSession != null && activeRaceSession.isActive();
+    }
 
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) {
-            return;
-        }
+    private boolean isOrganizer(Player player, Player organizer) {
+        return organizer.equals(player);
+    }
 
-        Component displayName = meta.displayName();
-        if (displayName == null || !displayName.equals(Component.text("§e§lゴールマーカー"))) {
-            return;
-        }
-
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-
-        if (event.getClickedBlock() == null) {
-            return;
-        }
-
-        event.setCancelled(true);
-
-        UUID playerId = player.getUniqueId();
-        List<ArmorStand> markers = goalLineMarkers.get(playerId);
-
-        // Check if player already has 2 markers
-        if (markers != null && markers.size() >= 2) {
-            player.sendMessage(MessageBuilder.warning("既に2つのゴールマーカーが設置されています"));
-            player.sendMessage(MessageBuilder.warning("/boatrace cleargoal で削除してください"));
-            return;
-        }
-
-        Location location = event.getClickedBlock().getLocation().add(0.5, 1, 0.5);
-        ArmorStand marker = createMarker(location, player);
-        goalLineMarkers.computeIfAbsent(playerId, k -> new ArrayList<>()).add(marker);
-
-        int markerCount = goalLineMarkers.get(playerId).size();
-        if (markerCount == 1) {
+    private boolean isGoalLineValid(Player player, GoalLine goalLine) {
+        if (goalLine == null || !goalLine.isValid()) {
             player.sendMessage(
-                MessageBuilder.success("ゴールマーカー1つ目を設置しました (残り1つ)"));
-        } else if (markerCount == 2) {
-            ArmorStand marker1 = goalLineMarkers.get(playerId).get(0);
-            ArmorStand marker2 = goalLineMarkers.get(playerId).get(1);
-            playerGoalLines.put(playerId, new GoalLine(marker1, marker2));
-            player.sendMessage(MessageBuilder.success("ゴールマーカー2つ目を設置しました"));
-            player.sendMessage(MessageBuilder.success("ゴールラインが完成しました！"));
-
-            // Calculate and show distance between markers
-            double distance = marker1.getLocation().distance(marker2.getLocation());
-            player.sendMessage(MessageBuilder.info(
-                String.format("マーカー間の距離: %.2fブロック", distance)));
+                MessageBuilder.error(Message.GOAL_NOT_SET.text()));
+            return false;
         }
+        return true;
     }
 
-    @EventHandler
-    public void onVehicleMove(VehicleMoveEvent event) {
-        if (!(event.getVehicle() instanceof Boat boat)) {
-            return;
-        }
-
-        if (boat.getPassengers().isEmpty()) {
-            return;
-        }
-
-        Entity passenger = boat.getPassengers().getFirst();
-        if (!(passenger instanceof Player player)) {
-            return;
-        }
-
-        if (activeRaceSession == null || !activeRaceSession.isActive()) {
-            return;
-        }
-
-        if (!activeRaceSession.isRaceStarted() || !activeRaceSession.isParticipant(player)) {
-            return;
-        }
-
-        Location boatLocation = boat.getLocation();
-        Location fromLocation = event.getFrom();
-
-    }
-
-    private boolean isInGoalHitbox(Location boatLoc, Location markerLoc) {
-        // Create a 1x2x1 hitbox centered at the marker
-        double minX = markerLoc.getX() - 0.5;
-        double maxX = markerLoc.getX() + 0.5;
-        double minY = markerLoc.getY() - 1.0;
-        double maxY = markerLoc.getY() + 1.0;
-        double minZ = markerLoc.getZ() - 0.5;
-        double maxZ = markerLoc.getZ() + 0.5;
-
-        return boatLoc.getX() >= minX && boatLoc.getX() <= maxX &&
-            boatLoc.getY() >= minY && boatLoc.getY() <= maxY &&
-            boatLoc.getZ() >= minZ && boatLoc.getZ() <= maxZ;
-    }
-
-    private List<ArmorStand> getAllGoalMarkers() {
-        List<ArmorStand> allMarkers = new ArrayList<>();
-        for (List<ArmorStand> markers : goalLineMarkers.values()) {
-            allMarkers.addAll(markers);
-        }
-        return allMarkers;
+    private boolean canStopRace(Player player) {
+        return activeRaceSession.isParticipant(player) ||
+            activeRaceSession.isOrganizer(player);
     }
 
     public SummerFestival getPlugin() {
         return plugin;
     }
 }
+

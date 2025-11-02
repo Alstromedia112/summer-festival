@@ -2,6 +2,8 @@ package com.me1q.summerFestival.game.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.constants.Config;
+import com.me1q.summerFestival.game.boatrace.constants.Message;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -60,14 +62,13 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (gameManager.hasGoalLine(player)) {
+        if (!gameManager.hasGoalLine(player)) {
             player.sendMessage(MessageBuilder.error("ゴール地点を設定してください"));
             player.sendMessage(MessageBuilder.warning("/boatrace getgoal - ゴールマーカーを取得"));
             return;
         }
 
-        // Parse maxPlayers (default: 10)
-        int maxPlayers = 10;
+        int maxPlayers = Config.DEFAULT_MAX_PLAYERS.value();
         if (args.length > 1) {
             try {
                 maxPlayers = Integer.parseInt(args[1]);
@@ -77,7 +78,6 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Parse organizerParticipates (default: true)
         boolean organizerParticipates = true;
         if (args.length > 2) {
             String participateArg = args[2].toLowerCase();
@@ -107,7 +107,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
     private void handleClearGoalCommand(Player player) {
         gameManager.clearGoalLines(player);
-        player.sendMessage(MessageBuilder.success("すべてのゴール地点を削除しました"));
+        player.sendMessage(MessageBuilder.success(Message.ALL_MARKERS_REMOVED.text()));
     }
 
     private void handleStopCommand(Player player) {
