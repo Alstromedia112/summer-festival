@@ -15,7 +15,7 @@ public class SlownessPotion {
 
     public static ItemStack createItem() {
         ItemStack potion = new ItemStack(Material.SPLASH_POTION);
-        org.bukkit.inventory.meta.PotionMeta meta = (PotionMeta) potion.getItemMeta();
+        PotionMeta meta = (PotionMeta) potion.getItemMeta();
 
         if (meta != null) {
             meta.displayName(Component.text("ポーソン").decoration(TextDecoration.ITALIC, false));
