@@ -1,6 +1,7 @@
 package com.me1q.summerFestival;
 
 import com.me1q.summerFestival.game.boatrace.BoatRaceCommand;
+import com.me1q.summerFestival.game.boatrace.BoatRaceItemRegister;
 import com.me1q.summerFestival.game.shooting.ShootingCommand;
 import com.me1q.summerFestival.game.tag.TagCommand;
 import com.me1q.summerFestival.game.tag.TagItemRegistrar;
@@ -19,6 +20,7 @@ public final class SummerFestival extends JavaPlugin {
         registerTagGame();
         registerBoatRaceGame();
         TagItemRegistrar.registerItems();
+        BoatRaceItemRegister.registerItems();
         getLogger().info("Enabled SummerFestival Plugin.");
     }
 
@@ -54,7 +56,6 @@ public final class SummerFestival extends JavaPlugin {
             command.setExecutor(boatRaceCommand);
             command.setTabCompleter(boatRaceCommand);
         }
-        getServer().getPluginManager().registerEvents(boatRaceCommand.getGameManager(), this);
 
         // Load existing goal markers from the world
         boatRaceCommand.getGameManager().loadExistingGoalMarkers();
