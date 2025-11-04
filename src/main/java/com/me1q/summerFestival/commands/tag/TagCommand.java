@@ -1,7 +1,12 @@
-package com.me1q.summerFestival.game.tag;
+package com.me1q.summerFestival.commands.tag;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.tag.TagManager;
+import com.me1q.summerFestival.game.tag.constants.TagConfig;
+import com.me1q.summerFestival.game.tag.constants.TagMessage;
+import com.me1q.summerFestival.game.tag.item.Decoy;
+import com.me1q.summerFestival.game.tag.item.InvisiblePotion;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.SpeedPotion;
@@ -9,18 +14,20 @@ import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class TagCommand implements CommandExecutor, TabCompleter {
 
-    private static final int MIN_DURATION = 30;
 
-    private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "help"};
+    private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "give",
+        "help"};
 
     private final TagManager gameManager;
 
@@ -42,17 +49,18 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         }
 
         switch (args[0].toLowerCase()) {
-            case "recruit" -> handleCommand(player, args);
+            case "recruit" -> handleRecruitCommand(player, args);
             case "join" -> gameManager.joinRecruit(player);
             case "start" -> gameManager.startGame(player);
             case "stop" -> gameManager.stopGame(player);
+            case "give" -> handleGiveCommand(player, args);
             default -> sendUsage(player);
         }
 
         return true;
     }
 
-    private void handleCommand(Player player, String[] args) {
+    private void handleRecruitCommand(Player player, String[] args) {
         if (args.length < 2) {
             player.sendMessage(
                 Component.text("使用方法: /tag recruit <時間(秒)>").color(NamedTextColor.RED));
@@ -70,15 +78,34 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         try {
             int duration = Integer.parseInt(args[1]);
 
-            if (duration < MIN_DURATION) {
-                player.sendMessage(MessageBuilder.error("時間を30秒以上で指定してください。"));
+            if (duration < TagConfig.MIN_DURATION_SECONDS.value()) {
+                player.sendMessage(MessageBuilder.error(TagMessage.MIN_DURATION_ERROR.text()));
                 return;
             }
 
             gameManager.startRecruit(player, duration);
         } catch (NumberFormatException e) {
-            player.sendMessage(MessageBuilder.error("数値を正しく入力してください。"));
+            player.sendMessage(MessageBuilder.error(TagMessage.INVALID_NUMBER.text()));
         }
+    }
+
+    private void handleGiveCommand(Player player, String[] args) {
+        if (args.length < 2) {
+            MessageBuilder.error("使用方法: /tag give <item>");
+            return;
+        }
+
+        ItemStack item;
+
+        switch (args[1].toLowerCase()) {
+            case "potion_of_invisibility" -> item = InvisiblePotion.createItem();
+            case "potion_of_speed" -> item = SpeedPotion.createItem();
+            case "potion_of_slowness" -> item = SlownessPotion.createItem();
+            case "decoy" -> item = Decoy.createItem();
+            default -> item = ItemStack.of(Material.AIR);
+        }
+
+        player.getInventory().addItem(item);
     }
 
     private void sendUsage(Player player) {
@@ -141,3 +168,4 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         return gameManager;
     }
 }
+
