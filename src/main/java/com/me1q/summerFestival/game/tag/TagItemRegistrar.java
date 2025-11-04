@@ -9,6 +9,10 @@ import org.bukkit.Bukkit;
 
 public final class TagItemRegistrar {
 
+    private TagItemRegistrar() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static void registerItems() {
         List<TagItemBase> items = List.of(
             new SmokeLauncher(),

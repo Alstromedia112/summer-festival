@@ -1,6 +1,7 @@
 package com.me1q.summerFestival.game.tag.session;
 
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.tag.constants.TagMessage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,15 +33,19 @@ public class TagRecruitSession {
     private void broadcastRecruitMessage() {
         Component message = MessageBuilder.separator()
             .append(Component.newline())
-            .append(Component.text("   増え鬼参加者募集中！").color(NamedTextColor.YELLOW)
+            .append(Component.text("   " + TagMessage.RECRUITMENT_HEADER.text())
+                .color(NamedTextColor.YELLOW)
                 .decorate(net.kyori.adventure.text.format.TextDecoration.BOLD))
             .append(Component.newline())
             .append(Component.text("   "))
-            .append(MessageBuilder.clickable("[参加する]", NamedTextColor.GREEN, "/tag join",
-                "クリックして参加"))
+            .append(MessageBuilder.clickable(
+                TagMessage.JOIN_BUTTON.text(),
+                NamedTextColor.GREEN,
+                "/tag join",
+                TagMessage.JOIN_BUTTON_HOVER.text()))
             .append(Component.newline())
-            .append(
-                Component.text("   ゲーム時間: " + gameDuration + "秒").color(NamedTextColor.AQUA))
+            .append(Component.text("   " + TagMessage.GAME_DURATION.text() + gameDuration + "秒")
+                .color(NamedTextColor.AQUA))
             .append(Component.newline())
             .append(MessageBuilder.separator());
 
@@ -52,12 +57,12 @@ public class TagRecruitSession {
 
     public void addPlayer(Player player) {
         if (players.contains(player)) {
-            player.sendMessage(MessageBuilder.warning("すでに参加しています！"));
+            player.sendMessage(MessageBuilder.warning(TagMessage.ALREADY_JOINED.text()));
             return;
         }
 
         players.add(player);
-        player.sendMessage(MessageBuilder.success("増え鬼に参加しました！"));
+        player.sendMessage(MessageBuilder.success(TagMessage.PLAYER_JOINED.text()));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
         broadcastParticipantJoined(player);
@@ -78,7 +83,7 @@ public class TagRecruitSession {
 
     public void cancel() {
         active = false;
-        broadcastToAll(MessageBuilder.warning("募集をキャンセルしました。"));
+        broadcastToAll(MessageBuilder.warning(TagMessage.RECRUITMENT_CANCELLED.text()));
     }
 
     public void stop() {

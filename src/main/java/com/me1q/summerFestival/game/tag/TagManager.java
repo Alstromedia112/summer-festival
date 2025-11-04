@@ -2,6 +2,8 @@ package com.me1q.summerFestival.game.tag;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.tag.constants.TagConfig;
+import com.me1q.summerFestival.game.tag.constants.TagMessage;
 import com.me1q.summerFestival.game.tag.session.TagRecruitSession;
 import com.me1q.summerFestival.game.tag.session.TagSession;
 import java.util.List;
@@ -13,7 +15,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class TagManager implements Listener {
 
-    private static final int MIN_PLAYERS = 2;
 
     private final SummerFestival plugin;
     private TagSession activeSession;
@@ -25,12 +26,12 @@ public class TagManager implements Listener {
 
     public void startRecruit(Player starter, int duration) {
         if (isGameActive()) {
-            starter.sendMessage(MessageBuilder.error("すでに開始されています！"));
+            starter.sendMessage(MessageBuilder.error(TagMessage.ALREADY_STARTED.text()));
             return;
         }
 
         if (isRecruitActive()) {
-            starter.sendMessage(MessageBuilder.error("すでに募集中です！"));
+            starter.sendMessage(MessageBuilder.error(TagMessage.ALREADY_RECRUITING.text()));
             return;
         }
 
@@ -40,7 +41,7 @@ public class TagManager implements Listener {
 
     public void joinRecruit(Player player) {
         if (!isRecruitActive()) {
-            player.sendMessage(MessageBuilder.error("現在募集は行われていません。"));
+            player.sendMessage(MessageBuilder.error(TagMessage.NO_RECRUITMENT.text()));
             return;
         }
 
@@ -49,7 +50,7 @@ public class TagManager implements Listener {
 
     public void cancelRecruit(Player player) {
         if (!isRecruitActive()) {
-            player.sendMessage(MessageBuilder.error("現在募集は行われていません。"));
+            player.sendMessage(MessageBuilder.error(TagMessage.NO_RECRUITMENT.text()));
             return;
         }
 
@@ -59,19 +60,19 @@ public class TagManager implements Listener {
 
     public void startGame(Player starter) {
         if (isGameActive()) {
-            starter.sendMessage(MessageBuilder.error("すでに開始されています！"));
+            starter.sendMessage(MessageBuilder.error(TagMessage.ALREADY_STARTED.text()));
             return;
         }
 
         if (!isRecruitActive()) {
             starter.sendMessage(
-                MessageBuilder.error("先に /tag recruit で募集を開始してください。"));
+                MessageBuilder.error(TagMessage.START_RECRUITMENT_FIRST.text()));
             return;
         }
 
         List<Player> players = recruitSession.getPlayers();
-        if (players.size() < MIN_PLAYERS) {
-            starter.sendMessage(MessageBuilder.error("プレイヤーが足りません！最低2人必要です。"));
+        if (players.size() < TagConfig.MIN_PLAYERS.value()) {
+            starter.sendMessage(MessageBuilder.error(TagMessage.MIN_PLAYERS_ERROR.text()));
             return;
         }
 
@@ -85,12 +86,12 @@ public class TagManager implements Listener {
 
     public void stopGame(Player player) {
         if (!isGameActive()) {
-            player.sendMessage(MessageBuilder.error("増え鬼は開始されていません。"));
+            player.sendMessage(MessageBuilder.error(TagMessage.NOT_STARTED.text()));
             return;
         }
 
         activeSession.stop();
-        player.sendMessage(MessageBuilder.warning("増え鬼を終了しました。"));
+        player.sendMessage(MessageBuilder.warning(TagMessage.GAME_STOPPED.text()));
     }
 
     @EventHandler

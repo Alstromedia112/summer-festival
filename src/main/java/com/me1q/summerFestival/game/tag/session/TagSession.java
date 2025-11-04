@@ -2,6 +2,9 @@ package com.me1q.summerFestival.game.tag.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.tag.constants.TagAnnouncement;
+import com.me1q.summerFestival.game.tag.constants.TagConfig;
+import com.me1q.summerFestival.game.tag.constants.TagMessage;
 import com.me1q.summerFestival.game.tag.player.Equipment;
 import com.me1q.summerFestival.game.tag.player.PlayerRole;
 import java.time.Duration;
@@ -27,7 +30,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class TagSession {
 
-    private static final int[] TIME_ANNOUNCEMENTS = {30, 10, 5, 4, 3, 2, 1};
 
     private final SummerFestival plugin;
     private final Set<Player> runners;
@@ -81,7 +83,7 @@ public class TagSession {
 
         player.showTitle(Title.title(
             Component.text(role.getDisplayName()).color(role.getColor()),
-            Component.text("GAME START").color(NamedTextColor.GOLD)
+            Component.text(TagMessage.GAME_START.text()).color(NamedTextColor.GOLD)
                 .decorate(TextDecoration.UNDERLINED)
         ));
 
@@ -107,25 +109,19 @@ public class TagSession {
     }
 
     private void updateAllPlayers() {
-        if (shouldAnnounceTime()) {
-            broadcastMessage(MessageBuilder.warning("残り時間: " + timeRemaining + "秒"));
+        if (TagAnnouncement.shouldAnnounceTime(timeRemaining)) {
+            broadcastMessage(MessageBuilder.warning(
+                TagMessage.REMAINING_TIME.text() + timeRemaining + "秒"));
         }
 
         Component actionBar = Component.text(
-            "残り時間: " + timeRemaining + "秒 | 鬼: " + taggers.size() + " 逃げ: " + runners.size()
+            TagMessage.REMAINING_TIME.text() + timeRemaining + "秒 | 鬼: " + taggers.size()
+                + " 逃げ: " + runners.size()
         ).color(NamedTextColor.AQUA);
 
         getAllPlayers().forEach(p -> p.sendActionBar(actionBar));
     }
 
-    private boolean shouldAnnounceTime() {
-        for (int time : TIME_ANNOUNCEMENTS) {
-            if (timeRemaining == time) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public void stop() {
         if (gameTask != null) {
@@ -157,17 +153,20 @@ public class TagSession {
 
         Equipment.equipPlayer(player, PlayerRole.TAGGER);
 
-        player.showTitle(Title.title(Component.text("捕まった").color(NamedTextColor.RED),
-            Component.text("あなたは鬼になった").color(NamedTextColor.GOLD)
+        player.showTitle(Title.title(
+            Component.text(TagMessage.CAPTURED_TITLE.text()).color(NamedTextColor.RED),
+            Component.text(TagMessage.BECAME_TAGGER.text()).color(NamedTextColor.GOLD)
                 .decorate(TextDecoration.UNDERLINED)));
 
         player.addPotionEffects(List.of(
-            new PotionEffect(PotionEffectType.BLINDNESS, 60, 1, false, false, false),
-            new PotionEffect(PotionEffectType.SLOWNESS, 60, 10, false, false, false)
+            new PotionEffect(PotionEffectType.BLINDNESS, TagConfig.BLINDNESS_DURATION_TICKS.value(),
+                1, false, false, false),
+            new PotionEffect(PotionEffectType.SLOWNESS, TagConfig.SLOWNESS_DURATION_TICKS.value(),
+                TagConfig.SLOWNESS_AMPLIFIER.value(), false, false, false)
         ));
 
         broadcastMessage(Component.text(player.getName()).color(NamedTextColor.RED)
-            .append(Component.text(" が鬼に捕まった！").color(NamedTextColor.YELLOW)));
+            .append(Component.text(TagMessage.PLAYER_CAUGHT.text()).color(NamedTextColor.YELLOW)));
     }
 
     private void playTouchSounds(Player tagger, Player victim) {
@@ -188,10 +187,10 @@ public class TagSession {
 
     private void showVictoryTitle(boolean taggersWin) {
         Component title = taggersWin
-            ? Component.text("✞ 鬼の勝利 ✞").color(NamedTextColor.RED)
-            : Component.text("✞ 逃げ側の勝利 ✞").color(NamedTextColor.BLUE);
+            ? Component.text(TagMessage.TAGGER_WIN.text()).color(NamedTextColor.RED)
+            : Component.text(TagMessage.RUNNER_WIN.text()).color(NamedTextColor.BLUE);
 
-        Component subtitle = Component.text("GAME END").color(NamedTextColor.YELLOW)
+        Component subtitle = Component.text(TagMessage.GAME_END.text()).color(NamedTextColor.YELLOW)
             .decorate(TextDecoration.UNDERLINED);
 
         Title victoryTitle = Title.title(title, subtitle,
@@ -215,7 +214,7 @@ public class TagSession {
             public void run() {
                 cleanup();
             }
-        }.runTaskLater(plugin, 100L);
+        }.runTaskLater(plugin, TagConfig.VICTORY_DISPLAY_DELAY_TICKS.value());
     }
 
     private void cleanup() {
@@ -240,7 +239,7 @@ public class TagSession {
 
         if (active) {
             broadcastMessage(
-                MessageBuilder.warning(player.getName() + " がゲームから退出しました。"));
+                MessageBuilder.warning(player.getName() + TagMessage.PLAYER_QUIT.text()));
 
             if (taggers.isEmpty() || runners.isEmpty()) {
                 stop();
