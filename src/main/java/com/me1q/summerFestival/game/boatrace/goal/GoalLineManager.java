@@ -59,67 +59,6 @@ public class GoalLineManager {
         this.playerGoalLines = new HashMap<>();
     }
 
-    public void loadExistingGoalMarkers() {
-        org.bukkit.NamespacedKey ownerKey = new org.bukkit.NamespacedKey(plugin,
-            Goal.PDC_KEY_GOAL_OWNER.text());
-        int loadedCount = 0;
-
-        for (org.bukkit.World world : plugin.getServer().getWorlds()) {
-            for (ArmorStand armorStand : world.getEntitiesByClass(ArmorStand.class)) {
-                if (!isGoalMarker(armorStand)) {
-                    continue;
-                }
-
-                String ownerUuidString = armorStand.getPersistentDataContainer()
-                    .get(ownerKey, org.bukkit.persistence.PersistentDataType.STRING);
-
-                if (ownerUuidString != null) {
-                    try {
-                        UUID ownerUuid = UUID.fromString(ownerUuidString);
-                        goalLineMarkers.computeIfAbsent(ownerUuid, k -> new ArrayList<>())
-                            .add(armorStand);
-                        loadedCount++;
-
-                        plugin.getLogger().info("Loaded goal marker at " +
-                            armorStand.getLocation().getBlockX() + ", " +
-                            armorStand.getLocation().getBlockY() + ", " +
-                            armorStand.getLocation().getBlockZ() +
-                            " (Owner: " + ownerUuidString + ")");
-                    } catch (IllegalArgumentException e) {
-                        plugin.getLogger()
-                            .warning("Invalid UUID in goal marker: " + ownerUuidString);
-                    }
-                } else {
-                    plugin.getLogger().warning("Found goal marker without owner data at " +
-                        armorStand.getLocation().getBlockX() + ", " +
-                        armorStand.getLocation().getBlockY() + ", " +
-                        armorStand.getLocation().getBlockZ());
-                }
-            }
-        }
-
-        if (loadedCount > 0) {
-            plugin.getLogger().info("Loaded " + loadedCount + " goal marker(s) from the world");
-        }
-
-        reconstructGoalLines();
-    }
-
-    private void reconstructGoalLines() {
-        for (Map.Entry<UUID, List<ArmorStand>> entry : goalLineMarkers.entrySet()) {
-            UUID ownerUuid = entry.getKey();
-            List<ArmorStand> markers = entry.getValue();
-
-            if (markers.size() == Config.REQUIRED_MARKERS.value()) {
-                playerGoalLines.put(ownerUuid, new GoalLine(markers.get(0), markers.get(1)));
-            } else if (markers.size() > Config.REQUIRED_MARKERS.value()) {
-                plugin.getLogger().warning("Player " + ownerUuid + " has " + markers.size() +
-                    " markers (expected 2). Creating goal line with first 2 markers.");
-                playerGoalLines.put(ownerUuid, new GoalLine(markers.get(0), markers.get(1)));
-            }
-        }
-    }
-
     public ArmorStand createMarker(Location location, Player owner) {
         ArmorStand marker = (ArmorStand) location.getWorld()
             .spawnEntity(location, EntityType.ARMOR_STAND);
@@ -179,23 +118,6 @@ public class GoalLineManager {
     public int getMarkerCount(Player player) {
         List<ArmorStand> markers = goalLineMarkers.get(player.getUniqueId());
         return markers != null ? markers.size() : 0;
-    }
-
-    public List<ArmorStand> getAllGoalMarkers() {
-        List<ArmorStand> allMarkers = new ArrayList<>();
-        for (List<ArmorStand> markers : goalLineMarkers.values()) {
-            allMarkers.addAll(markers);
-        }
-        return allMarkers;
-    }
-
-    private boolean isGoalMarker(ArmorStand armorStand) {
-        if (armorStand.customName() == null || armorStand.isVisible() || !armorStand.isGlowing()) {
-            return false;
-        }
-
-        String name = String.valueOf(armorStand.customName());
-        return Goal.ARMOR_STAND_NAME.text().equals(name);
     }
 
     public void sendMarkerPlacedMessage(Player player, int markerCount) {
