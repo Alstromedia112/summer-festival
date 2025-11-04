@@ -1,7 +1,8 @@
-package com.me1q.summerFestival.game.boatrace;
+package com.me1q.summerFestival.commands.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.BoatRaceManager;
 import com.me1q.summerFestival.game.boatrace.constants.Config;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
     private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "getgoal",
-        "cleargoal", "help"};
+        "cleargoal", "getitemstand", "help"};
 
     private final BoatRaceManager gameManager;
 
@@ -46,6 +47,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             case "stop" -> handleStopCommand(player);
             case "getgoal" -> handleGetGoalCommand(player);
             case "cleargoal" -> handleClearGoalCommand(player);
+            case "getitemstand" -> handleGetItemStandCommand(player);
             case "help" -> showHelp(player);
             default -> {
                 player.sendMessage(MessageBuilder.error("不明なサブコマンド: " + args[0]));
@@ -110,6 +112,10 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(MessageBuilder.success(Message.ALL_MARKERS_REMOVED.text()));
     }
 
+    private void handleGetItemStandCommand(Player player) {
+        gameManager.giveItemStandMarker(player);
+    }
+
     private void handleStopCommand(Player player) {
         gameManager.stopRace(player);
     }
@@ -119,6 +125,8 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(Component.text("/boatrace getgoal - ゴールマーカーを取得")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/boatrace cleargoal - すべてのゴールマーカーを削除")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace getitemstand - アイテムスタンドマーカーを取得")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text("/boatrace recruit <people> <true/false> - レース参加者を募集")
@@ -147,18 +155,15 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args[0].equalsIgnoreCase("recruit")) {
             if (args.length == 2) {
-                // Suggest "cancel" or numbers
                 if ("cancel".startsWith(args[1].toLowerCase())) {
                     completions.add("cancel");
                 }
-                // Suggest some common numbers
                 for (int i = 2; i <= 10; i++) {
                     if (String.valueOf(i).startsWith(args[1])) {
                         completions.add(String.valueOf(i));
                     }
                 }
             } else if (args.length == 3) {
-                // Suggest true/false for participation
                 if ("true".startsWith(args[2].toLowerCase())) {
                     completions.add("true");
                 }
@@ -175,3 +180,4 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         return gameManager;
     }
 }
+
