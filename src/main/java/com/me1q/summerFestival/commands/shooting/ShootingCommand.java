@@ -1,12 +1,18 @@
-package com.me1q.summerFestival.game.shooting;
+package com.me1q.summerFestival.commands.shooting;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.shooting.ShootingManager;
+import com.me1q.summerFestival.game.shooting.button.ButtonDataManager;
+import com.me1q.summerFestival.game.shooting.constants.ShootingConfig;
+import com.me1q.summerFestival.game.shooting.constants.ShootingMessage;
+import com.me1q.summerFestival.game.shooting.spawner.SpawnArea;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,13 +24,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class ShootingCommand implements CommandExecutor, TabCompleter {
 
-    private static final int REQUIRED_COORDINATE_ARGS = 7;
-    private static final String[] SUB_COMMANDS = {"start", "stop", "status", "help"};
+    private static final String[] SUB_COMMANDS = {"start", "stop", "status", "setbutton",
+        "removebutton", "help"};
 
     private final ShootingManager gameManager;
+    private final ButtonDataManager buttonDataManager;
 
     public ShootingCommand(SummerFestival plugin) {
         this.gameManager = new ShootingManager(plugin);
+        this.buttonDataManager = new ButtonDataManager(plugin);
     }
 
     @Override
@@ -32,7 +40,7 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
         @NotNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(
-                MessageBuilder.error("This command can only be executed by the player."));
+                MessageBuilder.error(ShootingMessage.PLAYER_ONLY.text()));
             return true;
         }
 
@@ -45,9 +53,12 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
             case "start" -> handleStartCommand(player, args);
             case "stop" -> handleStopCommand(player);
             case "status" -> handleStatusCommand(player);
+            case "setbutton" -> handleSetButtonCommand(player, args);
+            case "removebutton" -> handleRemoveButtonCommand(player);
             case "help" -> showHelp(player);
             default -> {
-                player.sendMessage(MessageBuilder.error("Unknown subcommand: " + args[0]));
+                player.sendMessage(
+                    MessageBuilder.error(ShootingMessage.UNKNOWN_SUBCOMMAND.text() + args[0]));
                 showHelp(player);
             }
         }
@@ -57,23 +68,23 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
 
     private void handleStartCommand(Player player, String[] args) {
         if (gameManager.isPlayerInGame(player)) {
-            player.sendMessage(MessageBuilder.error("You are already in the game."));
-            player.sendMessage(MessageBuilder.warning("End the game with: /shooting stop"));
+            player.sendMessage(MessageBuilder.error(ShootingMessage.ALREADY_IN_GAME.text()));
+            player.sendMessage(MessageBuilder.warning(ShootingMessage.END_GAME_COMMAND.text()));
             return;
         }
 
-        if (args.length != REQUIRED_COORDINATE_ARGS) {
+        if (args.length != ShootingConfig.REQUIRED_COORDINATE_ARGS.value()) {
             showStartUsage(player);
             return;
         }
 
         try {
             double[] coords = parseCoordinates(args);
-            player.sendMessage(MessageBuilder.success("射的ゲームを開始します..."));
+            player.sendMessage(MessageBuilder.success(ShootingMessage.GAME_STARTED.text()));
             gameManager.startGame(player, coords[0], coords[1], coords[2], coords[3], coords[4],
                 coords[5]);
         } catch (NumberFormatException e) {
-            player.sendMessage(MessageBuilder.error("座標の形式が正しくありません"));
+            player.sendMessage(MessageBuilder.error(ShootingMessage.INVALID_COORDINATES.text()));
             showStartUsage(player);
         }
     }
@@ -87,7 +98,7 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     }
 
     private void showStartUsage(Player player) {
-        player.sendMessage(MessageBuilder.error("座標範囲を指定してください"));
+        player.sendMessage(MessageBuilder.error(ShootingMessage.SPECIFY_COORDINATES.text()));
         player.sendMessage(
             MessageBuilder.warning("Usage: /shooting start <x> <y> <z> <dx> <dy> <dz>"));
         player.sendMessage(Component.text("Example: /shooting start 100 64 100 200 80 200")
@@ -96,20 +107,83 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
 
     private void handleStopCommand(Player player) {
         if (!gameManager.isPlayerInGame(player)) {
-            player.sendMessage(MessageBuilder.error("Not currently in the game."));
+            player.sendMessage(MessageBuilder.error(ShootingMessage.NOT_IN_GAME.text()));
             return;
         }
 
-        player.sendMessage(MessageBuilder.warning("Force stop the game..."));
+        player.sendMessage(MessageBuilder.warning(ShootingMessage.FORCE_STOP.text()));
         gameManager.stopGame(player);
     }
 
     private void handleStatusCommand(Player player) {
         if (gameManager.isPlayerInGame(player)) {
-            player.sendMessage(MessageBuilder.success("ゲーム進行中"));
+            player.sendMessage(MessageBuilder.success(ShootingMessage.GAME_IN_PROGRESS.text()));
         } else {
-            player.sendMessage(MessageBuilder.warning("現在ゲームに参加していません"));
+            player.sendMessage(MessageBuilder.warning(ShootingMessage.NOT_IN_GAME_JP.text()));
         }
+    }
+
+    private void handleSetButtonCommand(Player player, String[] args) {
+        if (args.length != 7) {
+            player.sendMessage(MessageBuilder.error("座標を正しく指定してください"));
+            player.sendMessage(
+                MessageBuilder.warning("Usage: /shooting setbutton <x1> <y1> <z1> <x2> <y2> <z2>"));
+            player.sendMessage(Component.text("Example: /shooting setbutton 100 64 100 200 80 200")
+                .color(NamedTextColor.GRAY));
+            return;
+        }
+
+        Block targetBlock = player.getTargetBlockExact(10);
+        if (targetBlock == null || !isButton(targetBlock.getType())) {
+            player.sendMessage(MessageBuilder.error("ボタンを見てこのコマンドを実行してください"));
+            return;
+        }
+
+        try {
+            double x1 = Double.parseDouble(args[1]);
+            double y1 = Double.parseDouble(args[2]);
+            double z1 = Double.parseDouble(args[3]);
+            double x2 = Double.parseDouble(args[4]);
+            double y2 = Double.parseDouble(args[5]);
+            double z2 = Double.parseDouble(args[6]);
+
+            SpawnArea spawnArea = new SpawnArea(x1, y1, z1, x2, y2, z2);
+            buttonDataManager.addButton(targetBlock.getLocation(), spawnArea);
+
+            player.sendMessage(MessageBuilder.success("ボタンに射的範囲を設定しました"));
+            player.sendMessage(MessageBuilder.info(
+                String.format("範囲: (%.1f, %.1f, %.1f) - (%.1f, %.1f, %.1f)",
+                    x1, y1, z1, x2, y2, z2)));
+        } catch (NumberFormatException e) {
+            player.sendMessage(MessageBuilder.error("座標の値が不正です"));
+        }
+    }
+
+    private void handleRemoveButtonCommand(Player player) {
+        Block targetBlock = player.getTargetBlockExact(10);
+        if (targetBlock == null || !isButton(targetBlock.getType())) {
+            player.sendMessage(MessageBuilder.error("ボタンを見てこのコマンドを実行してください"));
+            return;
+        }
+
+        buttonDataManager.removeButton(targetBlock.getLocation());
+        player.sendMessage(MessageBuilder.success("ボタンの設定を削除しました"));
+    }
+
+    private boolean isButton(Material material) {
+        return material == Material.OAK_BUTTON
+            || material == Material.SPRUCE_BUTTON
+            || material == Material.BIRCH_BUTTON
+            || material == Material.JUNGLE_BUTTON
+            || material == Material.ACACIA_BUTTON
+            || material == Material.DARK_OAK_BUTTON
+            || material == Material.MANGROVE_BUTTON
+            || material == Material.CHERRY_BUTTON
+            || material == Material.BAMBOO_BUTTON
+            || material == Material.CRIMSON_BUTTON
+            || material == Material.WARPED_BUTTON
+            || material == Material.STONE_BUTTON
+            || material == Material.POLISHED_BLACKSTONE_BUTTON;
     }
 
     private void showHelp(Player player) {
@@ -118,6 +192,10 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
             MessageBuilder.info("/shooting start <x> <y> <z> <dx> <dy> <dz> - ゲームを開始"));
         player.sendMessage(MessageBuilder.info("/shooting stop - ゲームを終了"));
         player.sendMessage(MessageBuilder.info("/shooting status - 現在の状況を確認"));
+        player.sendMessage(
+            MessageBuilder.info(
+                "/shooting setbutton <x1> <y1> <z1> <x2> <y2> <z2> - ボタンに射的範囲を設定"));
+        player.sendMessage(MessageBuilder.info("/shooting removebutton - ボタンの設定を削除"));
         player.sendMessage(Component.text(""));
 
         player.sendMessage(Component.text("座標範囲の指定:").color(NamedTextColor.YELLOW));
@@ -125,6 +203,13 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
             .color(NamedTextColor.WHITE));
         player.sendMessage(Component.text("• 例: /shooting start 100 64 100 200 80 200")
             .color(NamedTextColor.GRAY));
+        player.sendMessage(Component.text(""));
+
+        player.sendMessage(Component.text("ボタン設定:").color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("• ボタンを見ながらsetbuttonコマンドで範囲を設定")
+            .color(NamedTextColor.WHITE));
+        player.sendMessage(Component.text("• 設定後、プレイヤーがボタンを押すと射的が開始されます")
+            .color(NamedTextColor.WHITE));
         player.sendMessage(Component.text(""));
 
         player.sendMessage(Component.text("ルール:").color(NamedTextColor.YELLOW));
@@ -190,4 +275,9 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     public ShootingManager getGameManager() {
         return gameManager;
     }
+
+    public ButtonDataManager getButtonDataManager() {
+        return buttonDataManager;
+    }
 }
+
