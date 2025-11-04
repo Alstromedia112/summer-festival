@@ -1,9 +1,10 @@
 package com.me1q.summerFestival;
 
-import com.me1q.summerFestival.game.boatrace.BoatRaceCommand;
-import com.me1q.summerFestival.game.boatrace.BoatRaceItemRegister;
-import com.me1q.summerFestival.game.shooting.ShootingCommand;
-import com.me1q.summerFestival.game.tag.TagCommand;
+import com.me1q.summerFestival.commands.boatrace.BoatRaceCommand;
+import com.me1q.summerFestival.commands.shooting.ShootingCommand;
+import com.me1q.summerFestival.commands.tag.TagCommand;
+import com.me1q.summerFestival.game.boatrace.BoatRaceItemRegistrar;
+import com.me1q.summerFestival.game.shooting.button.ShootingButtonListener;
 import com.me1q.summerFestival.game.tag.TagItemRegistrar;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,7 +21,7 @@ public final class SummerFestival extends JavaPlugin {
         registerTagGame();
         registerBoatRaceGame();
         TagItemRegistrar.registerItems();
-        BoatRaceItemRegister.registerItems();
+        BoatRaceItemRegistrar.registerItems();
         getLogger().info("Enabled SummerFestival Plugin.");
     }
 
@@ -37,6 +38,13 @@ public final class SummerFestival extends JavaPlugin {
             command.setTabCompleter(shootingCommand);
         }
         getServer().getPluginManager().registerEvents(shootingCommand.getGameManager(), this);
+
+        ShootingButtonListener buttonListener = new ShootingButtonListener(
+            this,
+            shootingCommand.getGameManager(),
+            shootingCommand.getButtonDataManager()
+        );
+        getServer().getPluginManager().registerEvents(buttonListener, this);
     }
 
     private void registerTagGame() {
@@ -56,8 +64,5 @@ public final class SummerFestival extends JavaPlugin {
             command.setExecutor(boatRaceCommand);
             command.setTabCompleter(boatRaceCommand);
         }
-
-        // Load existing goal markers from the world
-        boatRaceCommand.getGameManager().loadExistingGoalMarkers();
     }
 }
