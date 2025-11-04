@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class SpeedPotion {
 
@@ -25,7 +26,7 @@ public class SpeedPotion {
             ).map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
             meta.clearCustomEffects();
             meta.addCustomEffect(
-                new PotionEffect(org.bukkit.potion.PotionEffectType.SPEED, 20 * 10, 1), true);
+                new PotionEffect(PotionEffectType.SPEED, 20 * 10, 1), true);
             meta.setColor(Color.AQUA);
             potion.setItemMeta(meta);
         }
