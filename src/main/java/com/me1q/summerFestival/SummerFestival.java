@@ -1,17 +1,27 @@
 package com.me1q.summerFestival;
 
-import com.me1q.summerFestival.games.boatrace.BoatRaceCommand;
-import com.me1q.summerFestival.games.shooting.ShootingGameCommand;
-import com.me1q.summerFestival.games.tag.TagCommand;
+import com.me1q.summerFestival.commands.boatrace.BoatRaceCommand;
+import com.me1q.summerFestival.commands.shooting.ShootingCommand;
+import com.me1q.summerFestival.commands.tag.TagCommand;
+import com.me1q.summerFestival.game.boatrace.BoatRaceItemRegistrar;
+import com.me1q.summerFestival.game.shooting.button.ShootingButtonListener;
+import com.me1q.summerFestival.game.tag.TagItemRegistrar;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SummerFestival extends JavaPlugin {
+
+    public static SummerFestival getInstance() {
+        return JavaPlugin.getPlugin(SummerFestival.class);
+    }
 
     @Override
     public void onEnable() {
         registerShootingGame();
         registerTagGame();
         registerBoatRaceGame();
+        TagItemRegistrar.registerItems();
+        BoatRaceItemRegistrar.registerItems();
         getLogger().info("Enabled SummerFestival Plugin.");
     }
 
@@ -21,26 +31,38 @@ public final class SummerFestival extends JavaPlugin {
     }
 
     private void registerShootingGame() {
-        ShootingGameCommand shootingGameCommand = new ShootingGameCommand(this);
-        getCommand("shootinggame").setExecutor(shootingGameCommand);
-        getCommand("shootinggame").setTabCompleter(shootingGameCommand);
-        getServer().getPluginManager().registerEvents(shootingGameCommand.getGameManager(), this);
+        ShootingCommand shootingCommand = new ShootingCommand(this);
+        PluginCommand command = getCommand("shooting");
+        if (command != null) {
+            command.setExecutor(shootingCommand);
+            command.setTabCompleter(shootingCommand);
+        }
+        getServer().getPluginManager().registerEvents(shootingCommand.getGameManager(), this);
+
+        ShootingButtonListener buttonListener = new ShootingButtonListener(
+            this,
+            shootingCommand.getGameManager(),
+            shootingCommand.getButtonDataManager()
+        );
+        getServer().getPluginManager().registerEvents(buttonListener, this);
     }
 
     private void registerTagGame() {
         TagCommand tagCommand = new TagCommand(this);
-        getCommand("tag").setExecutor(tagCommand);
-        getCommand("tag").setTabCompleter(tagCommand);
+        PluginCommand command = getCommand("tag");
+        if (command != null) {
+            command.setExecutor(tagCommand);
+            command.setTabCompleter(tagCommand);
+        }
         getServer().getPluginManager().registerEvents(tagCommand.getGameManager(), this);
     }
 
     private void registerBoatRaceGame() {
         BoatRaceCommand boatRaceCommand = new BoatRaceCommand(this);
-        getCommand("boatrace").setExecutor(boatRaceCommand);
-        getCommand("boatrace").setTabCompleter(boatRaceCommand);
-        getServer().getPluginManager().registerEvents(boatRaceCommand.getGameManager(), this);
-
-        // Load existing goal markers from the world
-        boatRaceCommand.getGameManager().loadExistingGoalMarkers();
+        PluginCommand command = getCommand("boatrace");
+        if (command != null) {
+            command.setExecutor(boatRaceCommand);
+            command.setTabCompleter(boatRaceCommand);
+        }
     }
 }
