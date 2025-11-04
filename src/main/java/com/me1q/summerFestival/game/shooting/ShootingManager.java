@@ -2,6 +2,8 @@ package com.me1q.summerFestival.game.shooting;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.shooting.constants.ShootingConfig;
+import com.me1q.summerFestival.game.shooting.constants.ShootingMessage;
 import com.me1q.summerFestival.game.shooting.session.ShootingSession;
 import com.me1q.summerFestival.game.shooting.spawner.SpawnArea;
 import com.me1q.summerFestival.game.shooting.spawner.TargetSpawner;
@@ -19,7 +21,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class ShootingManager implements Listener {
 
-    private static final long ARROW_CLEANUP_DELAY_TICKS = 1L;
 
     private final SummerFestival plugin;
     private final Map<Player, ShootingSession> activeSessions;
@@ -34,7 +35,7 @@ public class ShootingManager implements Listener {
     public void startGame(Player player, double x, double y, double z, double dx, double dy,
         double dz) {
         if (isPlayerInGame(player)) {
-            player.sendMessage(MessageBuilder.error("You are already in the game."));
+            player.sendMessage(MessageBuilder.error(ShootingMessage.ALREADY_IN_GAME.text()));
             return;
         }
 
@@ -54,7 +55,7 @@ public class ShootingManager implements Listener {
     public void stopGame(Player player) {
         ShootingSession session = activeSessions.get(player);
         if (session == null) {
-            player.sendMessage(MessageBuilder.error("Not currently in the game."));
+            player.sendMessage(MessageBuilder.error(ShootingMessage.NOT_IN_GAME.text()));
             return;
         }
 
@@ -102,7 +103,7 @@ public class ShootingManager implements Listener {
             public void run() {
                 arrow.remove();
             }
-        }.runTaskLater(plugin, ARROW_CLEANUP_DELAY_TICKS);
+        }.runTaskLater(plugin, ShootingConfig.ARROW_CLEANUP_DELAY_TICKS.value());
     }
 
     private void cleanupPlayerSession(Player player) {

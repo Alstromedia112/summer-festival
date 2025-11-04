@@ -24,5 +24,29 @@ public class SpawnArea {
         double z = ThreadLocalRandom.current().nextDouble(minZ, Math.max(maxZ, minZ + 1.0));
         return new Location(world, x, y, z);
     }
+
+    public double getMinX() {
+        return minX;
+    }
+
+    public double getMinY() {
+        return minY;
+    }
+
+    public double getMinZ() {
+        return minZ;
+    }
+
+    public double getMaxX() {
+        return maxX;
+    }
+
+    public double getMaxY() {
+        return maxY;
+    }
+
+    public double getMaxZ() {
+        return maxZ;
+    }
 }
 

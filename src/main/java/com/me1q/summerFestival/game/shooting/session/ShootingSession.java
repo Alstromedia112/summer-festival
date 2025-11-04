@@ -2,6 +2,9 @@ package com.me1q.summerFestival.game.shooting.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.shooting.constants.ShootingAnnouncement;
+import com.me1q.summerFestival.game.shooting.constants.ShootingConfig;
+import com.me1q.summerFestival.game.shooting.constants.ShootingMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,10 +17,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public class ShootingSession {
-
-    private static final int GAME_DURATION_SECONDS = 30;
-    private static final int TIME_BAR_LENGTH = 20;
-    private static final int[] TIME_WARNING_SECONDS = {5, 4, 3, 2, 1};
 
     private final Player player;
     private final SummerFestival plugin;
@@ -32,13 +31,13 @@ public class ShootingSession {
         this.plugin = plugin;
         this.onComplete = onComplete;
         this.score = 0;
-        this.timeRemaining = GAME_DURATION_SECONDS;
+        this.timeRemaining = ShootingConfig.GAME_DURATION_SECONDS.value();
         this.isActive = false;
     }
 
     public void start() {
         if (isActive) {
-            player.sendMessage(MessageBuilder.error("You are already in the game."));
+            player.sendMessage(MessageBuilder.error(ShootingMessage.ALREADY_IN_GAME.text()));
             return;
         }
 
@@ -51,12 +50,12 @@ public class ShootingSession {
 
     private void resetGameState() {
         score = 0;
-        timeRemaining = GAME_DURATION_SECONDS;
+        timeRemaining = ShootingConfig.GAME_DURATION_SECONDS.value();
     }
 
     private void showGameStartMessage() {
-        player.sendMessage(MessageBuilder.header("射的開始！"));
-        player.sendMessage(MessageBuilder.warning("30秒間でできるだけ多くの的を射抜こう"));
+        player.sendMessage(MessageBuilder.header(ShootingMessage.GAME_START_TITLE.text()));
+        player.sendMessage(MessageBuilder.warning(ShootingMessage.GAME_DURATION_INFO.text()));
     }
 
     public void stop() {
@@ -107,19 +106,17 @@ public class ShootingSession {
     }
 
     private void showTimeWarning() {
-        for (int warningTime : TIME_WARNING_SECONDS) {
-            if (timeRemaining == warningTime) {
-                player.sendMessage(Component.text(timeRemaining).color(NamedTextColor.RED));
-                break;
-            }
+        if (ShootingAnnouncement.shouldShowTimeWarning(timeRemaining)) {
+            player.sendMessage(Component.text(timeRemaining).color(NamedTextColor.RED));
         }
     }
 
     private Component createTimeBar() {
-        int filledBars = (timeRemaining * TIME_BAR_LENGTH) / GAME_DURATION_SECONDS;
+        int filledBars = (timeRemaining * ShootingConfig.TIME_BAR_LENGTH.value())
+            / ShootingConfig.GAME_DURATION_SECONDS.value();
         TextComponent.Builder bar = Component.text();
 
-        for (int i = 0; i < TIME_BAR_LENGTH; i++) {
+        for (int i = 0; i < ShootingConfig.TIME_BAR_LENGTH.value(); i++) {
             NamedTextColor color = i < filledBars ? NamedTextColor.GREEN : NamedTextColor.RED;
             bar.append(Component.text("█", color));
         }
