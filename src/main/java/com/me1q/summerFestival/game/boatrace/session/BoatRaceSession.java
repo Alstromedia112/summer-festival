@@ -239,6 +239,10 @@ public class BoatRaceSession {
 
         broadcastToParticipants(finishMessage);
 
+        player.showTitle(
+            Title.title(Component.text(getRankText(rank) + "位").color(getRankColor(rank)),
+                Component.text("タイム: " + Messages.finishTime(timeSeconds))
+                    .color(NamedTextColor.AQUA)));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 
         if (rankings.size() >= participants.size()) {

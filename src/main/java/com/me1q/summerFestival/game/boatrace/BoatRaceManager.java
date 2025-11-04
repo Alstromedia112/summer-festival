@@ -7,6 +7,9 @@ import com.me1q.summerFestival.game.boatrace.constants.Messages;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager.GoalLine;
 import com.me1q.summerFestival.game.boatrace.goal.GoalMarkerItem;
+import com.me1q.summerFestival.game.boatrace.itemstand.ItemStandManager;
+import com.me1q.summerFestival.game.boatrace.itemstand.ItemStandMarkerItem;
+import com.me1q.summerFestival.game.boatrace.itemstand.listener.ItemStandListener;
 import com.me1q.summerFestival.game.boatrace.listener.GoalMarkerListener;
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceRecruitSession;
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceSession;
@@ -17,6 +20,7 @@ public class BoatRaceManager {
 
     private final SummerFestival plugin;
     private final GoalLineManager goalLineManager;
+    private final ItemStandManager itemStandManager;
 
     private BoatRaceRecruitSession activeRecruitSession;
     private BoatRaceSession activeRaceSession;
@@ -24,6 +28,7 @@ public class BoatRaceManager {
     public BoatRaceManager(SummerFestival plugin) {
         this.plugin = plugin;
         this.goalLineManager = new GoalLineManager(plugin);
+        this.itemStandManager = new ItemStandManager();
         this.activeRecruitSession = null;
         this.activeRaceSession = null;
 
@@ -33,10 +38,8 @@ public class BoatRaceManager {
     private void registerListeners() {
         Bukkit.getPluginManager().registerEvents(
             new GoalMarkerListener(goalLineManager), plugin);
-    }
-
-    public void loadExistingGoalMarkers() {
-        goalLineManager.loadExistingGoalMarkers();
+        Bukkit.getPluginManager().registerEvents(
+            new ItemStandListener(itemStandManager), plugin);
     }
 
     public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates) {
@@ -162,6 +165,12 @@ public class BoatRaceManager {
         goalLineManager.clearGoalLines(player);
     }
 
+    public void giveItemStandMarker(Player player) {
+        player.getInventory().addItem(ItemStandMarkerItem.create());
+        player.sendMessage(
+            MessageBuilder.success("アイテムスタンドマーカーを取得しました"));
+    }
+
     public boolean hasGoalLine(Player player) {
         return goalLineManager.hasGoalLine(player);
     }
@@ -196,4 +205,3 @@ public class BoatRaceManager {
         return plugin;
     }
 }
-
