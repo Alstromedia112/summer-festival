@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class Decoy extends TagItemBase {
 
-    public ItemStack createItem() {
+    public static ItemStack createItem() {
         ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = playerHead.getItemMeta();
 
@@ -27,7 +27,7 @@ public class Decoy extends TagItemBase {
         }
 
         return playerHead;
-        
+
     }
 
     @Override
