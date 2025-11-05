@@ -3,8 +3,8 @@ package com.me1q.summerFestival.game.boatrace.itemstand.listener;
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.boatrace.itemstand.ItemStandManager;
 import com.me1q.summerFestival.game.boatrace.itemstand.ItemStandMarkerItem;
+import com.me1q.summerFestival.game.boatrace.itemstand.ItemStandRandomItemGenerator;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -74,13 +74,8 @@ public class ItemStandListener implements Listener {
                 continue;
             }
 
-            ItemStack helmet = stand.getEquipment().getHelmet();
-
-            if (helmet == null || helmet.getType() == Material.AIR) {
-                continue;
-            }
-
-            player.getInventory().addItem(helmet.clone());
+            ItemStack randomItem = ItemStandRandomItemGenerator.getRandomItem();
+            player.getInventory().addItem(randomItem);
             player.sendMessage(MessageBuilder.success("アイテムを取得しました"));
 
             itemStandManager.setCooldown(player.getUniqueId());
