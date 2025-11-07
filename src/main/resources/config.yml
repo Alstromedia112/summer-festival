@@ -1,3 +1,4 @@
 boatrace:
   goal-detection-delay-seconds: 3
+  laps: 3
 

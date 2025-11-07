@@ -52,7 +52,7 @@ public class BoatRaceListener implements Listener {
 
         if (goalLineDetector.hasPassedGoalLine(fromLocation, toLocation,
             raceSession.getGoalLine())) {
-            raceSession.recordFinish(player);
+            raceSession.recordGoalLineCross(player);
         }
     }
 }

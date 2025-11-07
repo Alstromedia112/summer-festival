@@ -24,8 +24,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public class BoatRaceSession {
-
-
+    
     private final SummerFestival plugin;
     private final List<Player> participants;
     private final Player organizer;
@@ -34,6 +33,8 @@ public class BoatRaceSession {
 
     private final Map<Player, Long> finishTimes;
     private final List<Player> rankings;
+    private final Map<Player, Integer> playerLaps;
+    private final Map<Player, Long> lastGoalCrossTime;
 
     private boolean isActive;
     private boolean raceStarted;
@@ -50,6 +51,8 @@ public class BoatRaceSession {
         this.onComplete = onComplete;
         this.finishTimes = new HashMap<>();
         this.rankings = new ArrayList<>();
+        this.playerLaps = new HashMap<>();
+        this.lastGoalCrossTime = new HashMap<>();
         this.isActive = false;
         this.raceStarted = false;
     }
@@ -218,8 +221,36 @@ public class BoatRaceSession {
         return goalLine;
     }
 
-    public void recordFinish(Player player) {
+    public void recordGoalLineCross(Player player) {
         if (finishTimes.containsKey(player)) {
+            return;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        long delayMillis = SummerFestival.getInstance().getConfigManager()
+            .getBoatRaceGoalDetectionDelaySeconds() * 1000L;
+
+        Long lastCrossTime = lastGoalCrossTime.get(player);
+        if (lastCrossTime != null && (currentTime - lastCrossTime) < delayMillis) {
+            return;
+        }
+
+        int requiredLaps = SummerFestival.getInstance().getConfigManager().getBoatRaceLaps();
+        int currentLap = playerLaps.getOrDefault(player, 0) + 1;
+        playerLaps.put(player, currentLap);
+        lastGoalCrossTime.put(player, currentTime);
+
+        if (currentLap < requiredLaps) {
+            Component lapMessage = Component.text(player.getName()).color(NamedTextColor.AQUA)
+                .append(Component.text(" が").color(NamedTextColor.GRAY))
+                .append(Component.text(currentLap + "周目").color(NamedTextColor.YELLOW))
+                .append(Component.text("を通過！").color(NamedTextColor.GRAY));
+            broadcastToParticipants(lapMessage);
+
+            player.showTitle(
+                Title.title(Component.text(currentLap + "/" + requiredLaps), Component.text("")));
+
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
             return;
         }
 
