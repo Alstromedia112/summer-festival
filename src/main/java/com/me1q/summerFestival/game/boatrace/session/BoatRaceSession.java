@@ -258,4 +258,14 @@ public class BoatRaceSession {
     public boolean hasFinished(Player player) {
         return finishTimes.containsKey(player);
     }
+
+    public boolean canDetectGoal() {
+        if (!raceStarted) {
+            return false;
+        }
+        long elapsedMillis = System.currentTimeMillis() - startTime;
+        long delaySeconds = SummerFestival.getInstance().getConfigManager()
+            .getBoatRaceGoalDetectionDelaySeconds();
+        return elapsedMillis >= (delaySeconds * 1000L);
+    }
 }

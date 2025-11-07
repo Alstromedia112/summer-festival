@@ -3,6 +3,7 @@ package com.me1q.summerFestival;
 import com.me1q.summerFestival.commands.boatrace.BoatRaceCommand;
 import com.me1q.summerFestival.commands.shooting.ShootingCommand;
 import com.me1q.summerFestival.commands.tag.TagCommand;
+import com.me1q.summerFestival.core.config.ConfigManager;
 import com.me1q.summerFestival.game.boatrace.BoatRaceItemRegistrar;
 import com.me1q.summerFestival.game.shooting.button.ShootingButtonListener;
 import com.me1q.summerFestival.game.tag.TagItemRegistrar;
@@ -11,12 +12,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SummerFestival extends JavaPlugin {
 
+    private ConfigManager configManager;
+
     public static SummerFestival getInstance() {
         return JavaPlugin.getPlugin(SummerFestival.class);
     }
 
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
     @Override
     public void onEnable() {
+        configManager = new ConfigManager(this);
         registerShootingGame();
         registerTagGame();
         registerBoatRaceGame();
