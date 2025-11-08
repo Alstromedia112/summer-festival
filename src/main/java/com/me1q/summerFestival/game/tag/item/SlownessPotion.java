@@ -24,7 +24,7 @@ public class SlownessPotion {
                 Component.text("10秒間移動速度が低下する").color(NamedTextColor.GRAY)
             ).map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
             meta.clearCustomEffects();
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20 * 10, 1), true);
+            meta.addCustomEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20 * 10, 2), true);
             meta.setColor(Color.GRAY);
             potion.setItemMeta(meta);
         }

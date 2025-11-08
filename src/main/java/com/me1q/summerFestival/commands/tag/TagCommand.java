@@ -24,8 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class TagCommand implements CommandExecutor, TabCompleter {
-
-
+    
     private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "give",
         "help"};
 
@@ -102,6 +101,7 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             case "potion_of_speed" -> item = SpeedPotion.createItem();
             case "potion_of_slowness" -> item = SlownessPotion.createItem();
             case "decoy" -> item = Decoy.createItem();
+            case "smoke_launcher" -> item = SmokeLauncher.createItem();
             default -> item = ItemStack.of(Material.AIR);
         }
 
