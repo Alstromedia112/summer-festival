@@ -2,6 +2,9 @@ package com.me1q.summerFestival.game.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.boatstand.BoatStandManager;
+import com.me1q.summerFestival.game.boatrace.boatstand.BoatStandMarkerItem;
+import com.me1q.summerFestival.game.boatrace.boatstand.listener.BoatStandListener;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
 import com.me1q.summerFestival.game.boatrace.constants.Messages;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager;
@@ -21,6 +24,7 @@ public class BoatRaceManager {
     private final SummerFestival plugin;
     private final GoalLineManager goalLineManager;
     private final ItemStandManager itemStandManager;
+    private final BoatStandManager boatStandManager;
 
     private BoatRaceRecruitSession activeRecruitSession;
     private BoatRaceSession activeRaceSession;
@@ -29,6 +33,7 @@ public class BoatRaceManager {
         this.plugin = plugin;
         this.goalLineManager = new GoalLineManager(plugin);
         this.itemStandManager = new ItemStandManager();
+        this.boatStandManager = new BoatStandManager();
         this.activeRecruitSession = null;
         this.activeRaceSession = null;
 
@@ -40,6 +45,8 @@ public class BoatRaceManager {
             new GoalMarkerListener(goalLineManager), plugin);
         Bukkit.getPluginManager().registerEvents(
             new ItemStandListener(itemStandManager), plugin);
+        Bukkit.getPluginManager().registerEvents(
+            new BoatStandListener(boatStandManager), plugin);
     }
 
     public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates) {
@@ -128,6 +135,7 @@ public class BoatRaceManager {
             activeRecruitSession.getParticipants(),
             organizer,
             goalLine,
+            boatStandManager.getBoatStandLocations(organizer),
             this::cleanupRaceSession
         );
 
@@ -169,6 +177,17 @@ public class BoatRaceManager {
         player.getInventory().addItem(ItemStandMarkerItem.create());
         player.sendMessage(
             MessageBuilder.success("アイテムスタンドマーカーを取得しました"));
+    }
+
+    public void giveBoatStandMarker(Player player) {
+        player.getInventory().addItem(BoatStandMarkerItem.create());
+        player.sendMessage(
+            MessageBuilder.success("ボートスタンドマーカーを取得しました"));
+    }
+
+    public void clearBoatStands(Player player) {
+        boatStandManager.clearBoatStands(player);
+        player.sendMessage(MessageBuilder.success("すべてのボートスタンドを削除しました"));
     }
 
     public boolean hasGoalLine(Player player) {

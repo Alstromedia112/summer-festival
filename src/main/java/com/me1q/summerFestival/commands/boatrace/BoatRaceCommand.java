@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
     private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "getgoal",
-        "cleargoal", "getitemstand", "help"};
+        "cleargoal", "getitemstand", "getboatstand", "clearboatstand", "help"};
 
     private final BoatRaceManager gameManager;
 
@@ -48,6 +48,8 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             case "getgoal" -> handleGetGoalCommand(player);
             case "cleargoal" -> handleClearGoalCommand(player);
             case "getitemstand" -> handleGetItemStandCommand(player);
+            case "getboatstand" -> handleGetBoatStandCommand(player);
+            case "clearboatstand" -> handleClearBoatStandCommand(player);
             case "help" -> showHelp(player);
             default -> {
                 player.sendMessage(MessageBuilder.error("不明なサブコマンド: " + args[0]));
@@ -116,6 +118,14 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         gameManager.giveItemStandMarker(player);
     }
 
+    private void handleGetBoatStandCommand(Player player) {
+        gameManager.giveBoatStandMarker(player);
+    }
+
+    private void handleClearBoatStandCommand(Player player) {
+        gameManager.clearBoatStands(player);
+    }
+
     private void handleStopCommand(Player player) {
         gameManager.stopRace(player);
     }
@@ -127,6 +137,10 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(Component.text("/boatrace cleargoal - すべてのゴールマーカーを削除")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/boatrace getitemstand - アイテムスタンドマーカーを取得")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace getboatstand - ボートスタンドマーカーを取得")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace clearboatstand - すべてのボートスタンドを削除")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text("/boatrace recruit <people> <true/false> - レース参加者を募集")

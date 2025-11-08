@@ -17,7 +17,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -30,11 +33,13 @@ public class BoatRaceSession {
     private final Player organizer;
     private final Runnable onComplete;
     private final GoalLine goalLine;
+    private final List<Location> boatStandLocations;
 
     private final Map<Player, Long> finishTimes;
     private final List<Player> rankings;
     private final Map<Player, Integer> playerLaps;
     private final Map<Player, Long> lastGoalCrossTime;
+    private final List<Boat> spawnedBoats;
 
     private boolean isActive;
     private boolean raceStarted;
@@ -43,16 +48,19 @@ public class BoatRaceSession {
     private BoatRaceListener raceListener;
 
     public BoatRaceSession(SummerFestival plugin, List<Player> participants,
-        Player organizer, GoalLine goalLine, Runnable onComplete) {
+        Player organizer, GoalLine goalLine, List<Location> boatStandLocations,
+        Runnable onComplete) {
         this.plugin = plugin;
         this.participants = new ArrayList<>(participants);
         this.organizer = organizer;
         this.goalLine = goalLine;
+        this.boatStandLocations = new ArrayList<>(boatStandLocations);
         this.onComplete = onComplete;
         this.finishTimes = new HashMap<>();
         this.rankings = new ArrayList<>();
         this.playerLaps = new HashMap<>();
         this.lastGoalCrossTime = new HashMap<>();
+        this.spawnedBoats = new ArrayList<>();
         this.isActive = false;
         this.raceStarted = false;
     }
@@ -67,6 +75,8 @@ public class BoatRaceSession {
 
         raceListener = new BoatRaceListener(this);
         Bukkit.getPluginManager().registerEvents(raceListener, plugin);
+
+        spawnBoats();
 
         broadcastToParticipants(MessageBuilder.header(Message.RACE_STARTED.text()));
         broadcastToParticipants(
@@ -89,6 +99,7 @@ public class BoatRaceSession {
             raceListener = null;
         }
 
+        removeBoats();
         showFinalResults();
         onComplete.run();
     }
@@ -149,6 +160,57 @@ public class BoatRaceSession {
         if (countdownTask != null) {
             countdownTask.cancel();
         }
+    }
+
+    private void spawnBoats() {
+        if (boatStandLocations.isEmpty()) {
+            broadcastToParticipants(
+                MessageBuilder.warning("ボートスタンドが設定されていません"));
+            return;
+        }
+
+        int participantIndex = 0;
+        for (Location location : boatStandLocations) {
+            if (location == null || location.getWorld() == null) {
+                continue;
+            }
+
+            if (participantIndex >= participants.size()) {
+                break;
+            }
+
+            Location boatLocation = location.clone().add(0, 0.5, 0);
+            Boat boat = (Boat) location.getWorld().spawnEntity(boatLocation, EntityType.OAK_BOAT);
+            boat.setGravity(true);
+            spawnedBoats.add(boat);
+
+            Player participant = participants.get(participantIndex);
+            if (participant.isOnline()) {
+                boat.addPassenger(participant);
+                participant.sendMessage(
+                    MessageBuilder.success("ボートに乗りました！カウントダウンをお待ちください"));
+            }
+
+            participantIndex++;
+        }
+
+        if (participantIndex < participants.size()) {
+            broadcastToParticipants(
+                MessageBuilder.warning(
+                    "ボートスタンドの数が参加者数より少ないため、一部のプレイヤーはボートに乗れませんでした"));
+        }
+ 
+        broadcastToParticipants(
+            MessageBuilder.info("ボートが出現しました！レースに備えてください"));
+    }
+
+    private void removeBoats() {
+        for (Boat boat : spawnedBoats) {
+            if (boat != null && boat.isValid()) {
+                boat.remove();
+            }
+        }
+        spawnedBoats.clear();
     }
 
     private void showFinalResults() {
