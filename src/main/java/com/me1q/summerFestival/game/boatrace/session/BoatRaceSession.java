@@ -24,7 +24,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public class BoatRaceSession {
-    
+
     private final SummerFestival plugin;
     private final List<Player> participants;
     private final Player organizer;
@@ -248,7 +248,7 @@ public class BoatRaceSession {
             broadcastToParticipants(lapMessage);
 
             player.showTitle(
-                Title.title(Component.text(currentLap + "/" + requiredLaps), Component.text("")));
+                Title.title(Component.text(""), Component.text(currentLap + "/" + requiredLaps)));
 
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
             return;
