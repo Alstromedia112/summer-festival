@@ -62,13 +62,11 @@ public class GoalLineManager {
     public ArmorStand createMarker(Location location, Player owner) {
         ArmorStand marker = (ArmorStand) location.getWorld()
             .spawnEntity(location, EntityType.ARMOR_STAND);
-        marker.setVisible(false);
         marker.setGravity(false);
+        marker.setVisible(false);
         marker.setInvulnerable(true);
         marker.customName(Component.text(Goal.ARMOR_STAND_NAME.text()));
-        marker.setCustomNameVisible(true);
         marker.setMarker(true);
-        marker.setGlowing(true);
 
         org.bukkit.NamespacedKey ownerKey = new org.bukkit.NamespacedKey(plugin,
             Goal.PDC_KEY_GOAL_OWNER.text());
