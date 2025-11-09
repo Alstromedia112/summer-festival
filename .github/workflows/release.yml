@@ -21,4 +21,4 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: ls
-        run: ls build
+        run: ls build/libs
