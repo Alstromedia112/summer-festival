@@ -2,6 +2,7 @@ package com.me1q.summerFestival.game.boatrace.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.banner.BannerManager;
 import com.me1q.summerFestival.game.boatrace.constants.Config;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
 import com.me1q.summerFestival.game.boatrace.constants.Messages;
@@ -42,6 +43,7 @@ public class BoatRaceSession {
     private final Map<Player, Long> lastGoalCrossTime;
     private final List<Boat> spawnedBoats;
     private final Map<Player, org.bukkit.GameMode> previousGameModes;
+    private final BannerManager bannerManager;
 
     private boolean isActive;
     private boolean raceStarted;
@@ -65,6 +67,7 @@ public class BoatRaceSession {
         this.lastGoalCrossTime = new HashMap<>();
         this.spawnedBoats = new ArrayList<>();
         this.previousGameModes = new HashMap<>();
+        this.bannerManager = new BannerManager();
         this.isActive = false;
         this.raceStarted = false;
     }
@@ -81,6 +84,7 @@ public class BoatRaceSession {
         Bukkit.getPluginManager().registerEvents(raceListener, plugin);
 
         setupSpectators();
+        assignAndEquipBanners();
         spawnBoats();
 
         broadcastToParticipants(MessageBuilder.header(Message.RACE_STARTED.text()));
@@ -105,6 +109,7 @@ public class BoatRaceSession {
         }
 
         restoreSpectators();
+        removeBanners();
         removeBoats();
         showFinalResults();
         onComplete.run();
@@ -192,6 +197,17 @@ public class BoatRaceSession {
                 spectator.sendMessage(MessageBuilder.success("観戦者モードに設定されました"));
             }
         }
+    }
+
+    private void assignAndEquipBanners() {
+        bannerManager.assignBanners(participants);
+        bannerManager.equipBanners();
+
+        broadcastToParticipants(MessageBuilder.success("チームの旗を装備しました！"));
+    }
+
+    private void removeBanners() {
+        bannerManager.removeBanners();
     }
 
     private void restoreSpectators() {
