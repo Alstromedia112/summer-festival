@@ -42,9 +42,17 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("join")) {
+            handleJoinCommand(player, args);
+        }
+
+        if (!player.isOp()) {
+            player.sendMessage(MessageBuilder.error("このコマンドを実行する権限がありません。"));
+            return true;
+        }
+
         switch (args[0].toLowerCase()) {
             case "recruit" -> handleRecruitCommand(player, args);
-            case "join" -> handleJoinCommand(player, args);
             case "draw" -> handleDrawCommand(player);
             case "start" -> handleStartCommand(player);
             case "stop" -> handleStopCommand(player);
@@ -56,7 +64,6 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             case "help" -> showHelp(player);
             default -> {
                 player.sendMessage(MessageBuilder.error("不明なコマンド: " + args[0]));
-                showHelp(player);
             }
         }
 

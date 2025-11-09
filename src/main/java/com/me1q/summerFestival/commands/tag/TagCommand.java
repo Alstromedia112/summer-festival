@@ -24,7 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class TagCommand implements CommandExecutor, TabCompleter {
-    
+
     private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "give",
         "help"};
 
@@ -47,10 +47,19 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("join")) {
+            gameManager.joinRecruit(player);
+            return true;
+        }
+
+        if (!player.isOp()) {
+            player.sendMessage(MessageBuilder.error("このコマンドを実行する権限がありません。"));
+            return true;
+        }
+
         switch (args[0].toLowerCase()) {
             case "recruit" -> handleRecruitCommand(player, args);
-            case "join" -> gameManager.joinRecruit(player);
-            case "start" -> gameManager.startGame(player);
+            case "start" -> handleStartCommand(player, args);
             case "stop" -> gameManager.stopGame(player);
             case "give" -> handleGiveCommand(player, args);
             default -> sendUsage(player);
@@ -88,6 +97,26 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private void handleStartCommand(Player player, String[] args) {
+        if (args.length == 1) {
+            gameManager.startGame(player);
+            return;
+        }
+
+        List<Player> initialTaggers = new ArrayList<>();
+        for (int i = 1; i < args.length; i++) {
+            Player tagger = player.getServer().getPlayer(args[i]);
+            if (tagger == null) {
+                player.sendMessage(MessageBuilder.error(
+                    "プレイヤー '" + args[i] + "' が見つかりません。"));
+                return;
+            }
+            initialTaggers.add(tagger);
+        }
+
+        gameManager.startGame(player, initialTaggers);
+    }
+
     private void handleGiveCommand(Player player, String[] args) {
         if (args.length < 2) {
             MessageBuilder.error("使用方法: /tag give <item>");
@@ -110,15 +139,6 @@ public class TagCommand implements CommandExecutor, TabCompleter {
 
     private void sendUsage(Player player) {
         player.sendMessage(MessageBuilder.header("増え鬼"));
-        player.sendMessage(
-            Component.text("/tag recruit <time> - 参加者を募集").color(NamedTextColor.YELLOW));
-        player.sendMessage(
-            Component.text("/tag recruit cancel - 募集をキャンセル").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("/tag join - 募集に参加").color(NamedTextColor.YELLOW));
-        player.sendMessage(
-            Component.text("/tag start - 増え鬼を開始").color(NamedTextColor.YELLOW));
-        player.sendMessage(
-            Component.text("/tag stop - 増え鬼を終了").color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text(""));
         player.sendMessage(Component.text("ルール:").color(NamedTextColor.AQUA));
         player.sendMessage(
@@ -127,16 +147,12 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             Component.text("- 捕まった人は鬼になります").color(NamedTextColor.WHITE));
         player.sendMessage(Component.text("- 時間内に全員鬼にならなければ逃げ側の勝ち")
             .color(NamedTextColor.WHITE));
-
-        player.getInventory().addItem(SpeedPotion.createItem());
-        player.getInventory().addItem(SlownessPotion.createItem());
-        player.getInventory().addItem(new SmokeLauncher().createItem());
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender,
         @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             return null;
         }
 
@@ -157,6 +173,12 @@ public class TagCommand implements CommandExecutor, TabCompleter {
                     if (duration.startsWith(args[1])) {
                         completions.add(duration);
                     }
+                }
+            }
+        } else if (args[0].equalsIgnoreCase("start")) {
+            for (Player p : player.getServer().getOnlinePlayers()) {
+                if (p.getName().toLowerCase().startsWith(args[args.length - 1].toLowerCase())) {
+                    completions.add(p.getName());
                 }
             }
         }
