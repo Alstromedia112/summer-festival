@@ -21,7 +21,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Archive JAR
-        run: mkdir artifacts && cp target/*.jar artifacts/
+        run: mkdir artifacts && cp build/libs/.jar artifacts/
       - name: Generate custom release notes
         uses: actions/github-script@v7
         id: notes
