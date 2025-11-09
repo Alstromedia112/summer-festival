@@ -44,7 +44,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
         switch (args[0].toLowerCase()) {
             case "recruit" -> handleRecruitCommand(player, args);
-            case "join" -> handleJoinCommand(player);
+            case "join" -> handleJoinCommand(player, args);
             case "draw" -> handleDrawCommand(player);
             case "start" -> handleStartCommand(player);
             case "stop" -> handleStopCommand(player);
@@ -55,7 +55,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             case "clearboatstand" -> handleClearBoatStandCommand(player);
             case "help" -> showHelp(player);
             default -> {
-                player.sendMessage(MessageBuilder.error("不明なサブコマンド: " + args[0]));
+                player.sendMessage(MessageBuilder.error("不明なコマンド: " + args[0]));
                 showHelp(player);
             }
         }
@@ -111,8 +111,12 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         gameManager.startRecruit(player, maxPlayers, organizerParticipates, mode);
     }
 
-    private void handleJoinCommand(Player player) {
-        gameManager.joinRecruit(player);
+    private void handleJoinCommand(Player player, String[] args) {
+        if (args.length > 1 && args[1].equalsIgnoreCase("spectator")) {
+            gameManager.joinRecruitAsSpectator(player);
+        } else {
+            gameManager.joinRecruit(player);
+        }
     }
 
     private void handleDrawCommand(Player player) {
@@ -169,6 +173,9 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(
             Component.text("/boatrace join - 募集中のレースに参加").color(NamedTextColor.YELLOW));
         player.sendMessage(
+            Component.text("/boatrace join spectator - 観戦者として参加")
+                .color(NamedTextColor.YELLOW));
+        player.sendMessage(
             Component.text("/boatrace draw - 抽選を実施 (抽選モードのみ)")
                 .color(NamedTextColor.YELLOW));
         player.sendMessage(
@@ -212,6 +219,12 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
                 }
                 if ("lottery".startsWith(args[3].toLowerCase())) {
                     completions.add("lottery");
+                }
+            }
+        } else if (args[0].equalsIgnoreCase("join")) {
+            if (args.length == 2) {
+                if ("spectator".startsWith(args[1].toLowerCase())) {
+                    completions.add("spectator");
                 }
             }
         }

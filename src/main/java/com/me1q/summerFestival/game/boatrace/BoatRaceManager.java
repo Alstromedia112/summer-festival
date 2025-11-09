@@ -90,6 +90,16 @@ public class BoatRaceManager {
         activeRecruitSession.addPlayer(player);
     }
 
+    public void joinRecruitAsSpectator(Player player) {
+        if (!isRecruitmentActive()) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NO_RECRUITMENT.text()));
+            return;
+        }
+
+        activeRecruitSession.addSpectator(player);
+    }
+
     public void cancelRecruit(Player player) {
         if (!isRecruitmentActive()) {
             player.sendMessage(
@@ -170,6 +180,7 @@ public class BoatRaceManager {
         activeRaceSession = new BoatRaceSession(
             plugin,
             activeRecruitSession.getParticipants(),
+            activeRecruitSession.getSpectators(),
             organizer,
             goalLine,
             boatStandManager.getBoatStandLocations(organizer),

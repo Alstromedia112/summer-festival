@@ -30,6 +30,7 @@ public class BoatRaceSession {
 
     private final SummerFestival plugin;
     private final List<Player> participants;
+    private final List<Player> spectators;
     private final Player organizer;
     private final Runnable onComplete;
     private final GoalLine goalLine;
@@ -40,6 +41,7 @@ public class BoatRaceSession {
     private final Map<Player, Integer> playerLaps;
     private final Map<Player, Long> lastGoalCrossTime;
     private final List<Boat> spawnedBoats;
+    private final Map<Player, org.bukkit.GameMode> previousGameModes;
 
     private boolean isActive;
     private boolean raceStarted;
@@ -48,10 +50,11 @@ public class BoatRaceSession {
     private BoatRaceListener raceListener;
 
     public BoatRaceSession(SummerFestival plugin, List<Player> participants,
-        Player organizer, GoalLine goalLine, List<Location> boatStandLocations,
-        Runnable onComplete) {
+        List<Player> spectators, Player organizer, GoalLine goalLine,
+        List<Location> boatStandLocations, Runnable onComplete) {
         this.plugin = plugin;
         this.participants = new ArrayList<>(participants);
+        this.spectators = new ArrayList<>(spectators);
         this.organizer = organizer;
         this.goalLine = goalLine;
         this.boatStandLocations = new ArrayList<>(boatStandLocations);
@@ -61,6 +64,7 @@ public class BoatRaceSession {
         this.playerLaps = new HashMap<>();
         this.lastGoalCrossTime = new HashMap<>();
         this.spawnedBoats = new ArrayList<>();
+        this.previousGameModes = new HashMap<>();
         this.isActive = false;
         this.raceStarted = false;
     }
@@ -76,6 +80,7 @@ public class BoatRaceSession {
         raceListener = new BoatRaceListener(this);
         Bukkit.getPluginManager().registerEvents(raceListener, plugin);
 
+        setupSpectators();
         spawnBoats();
 
         broadcastToParticipants(MessageBuilder.header(Message.RACE_STARTED.text()));
@@ -99,6 +104,7 @@ public class BoatRaceSession {
             raceListener = null;
         }
 
+        restoreSpectators();
         removeBoats();
         showFinalResults();
         onComplete.run();
@@ -130,6 +136,14 @@ public class BoatRaceSession {
                                 1.0f);
                         }
                     }
+                    for (Player spectator : spectators) {
+                        if (spectator.isOnline()) {
+                            spectator.showTitle(title);
+                            spectator.playSound(spectator.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT,
+                                1.0f,
+                                1.0f);
+                        }
+                    }
                     countdown[0]--;
                 } else {
                     Title title = Title.title(
@@ -143,6 +157,14 @@ public class BoatRaceSession {
                         if (player.isOnline()) {
                             player.showTitle(title);
                             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,
+                                1.0f, 2.0f);
+                        }
+                    }
+                    for (Player spectator : spectators) {
+                        if (spectator.isOnline()) {
+                            spectator.showTitle(title);
+                            spectator.playSound(spectator.getLocation(),
+                                Sound.BLOCK_NOTE_BLOCK_BELL,
                                 1.0f, 2.0f);
                         }
                     }
@@ -160,6 +182,29 @@ public class BoatRaceSession {
         if (countdownTask != null) {
             countdownTask.cancel();
         }
+    }
+
+    private void setupSpectators() {
+        for (Player spectator : spectators) {
+            if (spectator.isOnline()) {
+                previousGameModes.put(spectator, spectator.getGameMode());
+                spectator.setGameMode(org.bukkit.GameMode.SPECTATOR);
+                spectator.sendMessage(MessageBuilder.success("観戦者モードに設定されました"));
+            }
+        }
+    }
+
+    private void restoreSpectators() {
+        for (Player spectator : spectators) {
+            if (spectator.isOnline()) {
+                org.bukkit.GameMode previousMode = previousGameModes.get(spectator);
+                if (previousMode != null) {
+                    spectator.setGameMode(previousMode);
+                    spectator.sendMessage(MessageBuilder.info("ゲームモードが復元されました"));
+                }
+            }
+        }
+        previousGameModes.clear();
     }
 
     private void spawnBoats() {
@@ -199,7 +244,7 @@ public class BoatRaceSession {
                 MessageBuilder.warning(
                     "ボートスタンドの数が参加者数より少ないため、一部のプレイヤーはボートに乗れませんでした"));
         }
- 
+
         broadcastToParticipants(
             MessageBuilder.info("ボートが出現しました！レースに備えてください"));
     }
@@ -257,6 +302,11 @@ public class BoatRaceSession {
 
     private void broadcastToParticipants(Component message) {
         participants.forEach(p -> {
+            if (p.isOnline()) {
+                p.sendMessage(message);
+            }
+        });
+        spectators.forEach(p -> {
             if (p.isOnline()) {
                 p.sendMessage(message);
             }

@@ -19,6 +19,7 @@ public class BoatRaceRecruitSession {
 
     private final Player organizer;
     private final Set<Player> participants;
+    private final Set<Player> spectators;
     private final int maxPlayers;
     private final RecruitmentMode mode;
     private boolean active;
@@ -29,6 +30,7 @@ public class BoatRaceRecruitSession {
         RecruitmentMode mode) {
         this.organizer = organizer;
         this.participants = new HashSet<>();
+        this.spectators = new HashSet<>();
         this.maxPlayers = maxPlayers;
         this.mode = mode;
         this.active = false;
@@ -73,6 +75,11 @@ public class BoatRaceRecruitSession {
             return;
         }
 
+        if (spectators.contains(player)) {
+            player.sendMessage(MessageBuilder.warning("既に観戦者として参加しています"));
+            return;
+        }
+
         if (mode == RecruitmentMode.FIRST_COME && participants.size() >= maxPlayers) {
             player.sendMessage(
                 MessageBuilder.error(Messages.maxPlayersReached(maxPlayers)));
@@ -84,6 +91,24 @@ public class BoatRaceRecruitSession {
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
         broadcastParticipantJoined(player);
+    }
+
+    public void addSpectator(Player player) {
+        if (participants.contains(player)) {
+            player.sendMessage(MessageBuilder.warning("既に参加者として参加しています"));
+            return;
+        }
+
+        if (spectators.contains(player)) {
+            player.sendMessage(MessageBuilder.warning("既に観戦者として参加しています"));
+            return;
+        }
+
+        spectators.add(player);
+        player.sendMessage(MessageBuilder.success("観戦者としてボートレースに参加しました!"));
+        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+
+        broadcastSpectatorJoined(player);
     }
 
     private void broadcastParticipantJoined(Player player) {
@@ -100,6 +125,15 @@ public class BoatRaceRecruitSession {
 
         Component finalBroadcast = broadcast;
         participants.forEach(p -> p.sendMessage(finalBroadcast));
+    }
+
+    private void broadcastSpectatorJoined(Player player) {
+        Component broadcast = Component.text(player.getName()).color(NamedTextColor.AQUA)
+            .append(Component.text(" が観戦者として参加しました").color(NamedTextColor.GRAY));
+
+        Component finalBroadcast = broadcast;
+        participants.forEach(p -> p.sendMessage(finalBroadcast));
+        spectators.forEach(p -> p.sendMessage(finalBroadcast));
     }
 
     public void cancel() {
@@ -123,6 +157,10 @@ public class BoatRaceRecruitSession {
             return new ArrayList<>(selectedParticipants);
         }
         return new ArrayList<>(participants);
+    }
+
+    public List<Player> getSpectators() {
+        return new ArrayList<>(spectators);
     }
 
     public void performLottery() {
