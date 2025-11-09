@@ -18,6 +18,13 @@ commands:
     description: Manage boat racing game
     usage: /<command> <start|stop|help>
     aliases: [ br ]
+  currency:
+    description: Manage currency
+    usage: /<command> <balance|add|remove|set>
+    aliases: [ money, cur ]
+  shop:
+    description: Manage shop
+    usage: /<command> <spawn|remove|open>
 
 permissions:
   summerfestival.shooting:
@@ -29,3 +36,21 @@ permissions:
   summerfestival.boatrace:
     description: Permission to use boat racing game
     default: true
+  summerfestival.currency.add:
+    description: Permission to add currency
+    default: op
+  summerfestival.currency.remove:
+    description: Permission to remove currency
+    default: op
+  summerfestival.currency.set:
+    description: Permission to set currency
+    default: op
+  summerfestival.shop.spawn:
+    description: Permission to spawn shop villager
+    default: op
+  summerfestival.shop.remove:
+    description: Permission to remove shop villager
+    default: op
+  summerfestival.shop.admin:
+    description: Permission to manage shop items
+    default: op

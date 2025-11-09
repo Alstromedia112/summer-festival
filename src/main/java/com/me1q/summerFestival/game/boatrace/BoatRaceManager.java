@@ -2,8 +2,12 @@ package com.me1q.summerFestival.game.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.boatstand.BoatStandManager;
+import com.me1q.summerFestival.game.boatrace.boatstand.BoatStandMarkerItem;
+import com.me1q.summerFestival.game.boatrace.boatstand.listener.BoatStandListener;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
 import com.me1q.summerFestival.game.boatrace.constants.Messages;
+import com.me1q.summerFestival.game.boatrace.constants.RecruitmentMode;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager.GoalLine;
 import com.me1q.summerFestival.game.boatrace.goal.GoalMarkerItem;
@@ -21,6 +25,7 @@ public class BoatRaceManager {
     private final SummerFestival plugin;
     private final GoalLineManager goalLineManager;
     private final ItemStandManager itemStandManager;
+    private final BoatStandManager boatStandManager;
 
     private BoatRaceRecruitSession activeRecruitSession;
     private BoatRaceSession activeRaceSession;
@@ -29,6 +34,7 @@ public class BoatRaceManager {
         this.plugin = plugin;
         this.goalLineManager = new GoalLineManager(plugin);
         this.itemStandManager = new ItemStandManager();
+        this.boatStandManager = new BoatStandManager();
         this.activeRecruitSession = null;
         this.activeRaceSession = null;
 
@@ -40,9 +46,12 @@ public class BoatRaceManager {
             new GoalMarkerListener(goalLineManager), plugin);
         Bukkit.getPluginManager().registerEvents(
             new ItemStandListener(itemStandManager), plugin);
+        Bukkit.getPluginManager().registerEvents(
+            new BoatStandListener(boatStandManager), plugin);
     }
 
-    public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates) {
+    public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates,
+        RecruitmentMode mode) {
         if (isRecruitmentActive()) {
             organizer.sendMessage(
                 MessageBuilder.error(Message.ALREADY_RECRUITING.text()));
@@ -67,7 +76,7 @@ public class BoatRaceManager {
             Messages.recruitmentStarted(maxPlayers, organizerParticipates)));
 
         activeRecruitSession = new BoatRaceRecruitSession(organizer, maxPlayers,
-            organizerParticipates);
+            organizerParticipates, mode);
         activeRecruitSession.start();
     }
 
@@ -79,6 +88,16 @@ public class BoatRaceManager {
         }
 
         activeRecruitSession.addPlayer(player);
+    }
+
+    public void joinRecruitAsSpectator(Player player) {
+        if (!isRecruitmentActive()) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NO_RECRUITMENT.text()));
+            return;
+        }
+
+        activeRecruitSession.addSpectator(player);
     }
 
     public void cancelRecruit(Player player) {
@@ -96,6 +115,34 @@ public class BoatRaceManager {
 
         activeRecruitSession.cancel();
         activeRecruitSession = null;
+    }
+
+    public void drawLottery(Player player) {
+        if (!isRecruitmentActive()) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NO_RECRUITMENT.text()));
+            return;
+        }
+
+        if (!isOrganizer(player, activeRecruitSession.getOrganizer())) {
+            player.sendMessage(MessageBuilder.error(
+                Message.ONLY_ORGANIZER_CAN_CANCEL.text()));
+            return;
+        }
+
+        if (activeRecruitSession.getMode() != RecruitmentMode.LOTTERY) {
+            player.sendMessage(
+                MessageBuilder.error("抽選モードではありません"));
+            return;
+        }
+
+        if (activeRecruitSession.isLotteryDrawn()) {
+            player.sendMessage(
+                MessageBuilder.warning("すでに抽選が実施されています"));
+            return;
+        }
+
+        activeRecruitSession.performLottery();
     }
 
     public void startRace(Player organizer) {
@@ -116,6 +163,13 @@ public class BoatRaceManager {
             return;
         }
 
+        if (activeRecruitSession.getMode() == RecruitmentMode.LOTTERY
+            && !activeRecruitSession.isLotteryDrawn()) {
+            organizer.sendMessage(MessageBuilder.error(
+                "抽選を実施してください (/boatrace draw)"));
+            return;
+        }
+
         GoalLine goalLine = goalLineManager.getGoalLine(organizer);
         if (!isGoalLineValid(organizer, goalLine)) {
             return;
@@ -126,8 +180,10 @@ public class BoatRaceManager {
         activeRaceSession = new BoatRaceSession(
             plugin,
             activeRecruitSession.getParticipants(),
+            activeRecruitSession.getSpectators(),
             organizer,
             goalLine,
+            boatStandManager.getBoatStandLocations(organizer),
             this::cleanupRaceSession
         );
 
@@ -169,6 +225,17 @@ public class BoatRaceManager {
         player.getInventory().addItem(ItemStandMarkerItem.create());
         player.sendMessage(
             MessageBuilder.success("アイテムスタンドマーカーを取得しました"));
+    }
+
+    public void giveBoatStandMarker(Player player) {
+        player.getInventory().addItem(BoatStandMarkerItem.create());
+        player.sendMessage(
+            MessageBuilder.success("ボートスタンドマーカーを取得しました"));
+    }
+
+    public void clearBoatStands(Player player) {
+        boatStandManager.clearBoatStands(player);
+        player.sendMessage(MessageBuilder.success("すべてのボートスタンドを削除しました"));
     }
 
     public boolean hasGoalLine(Player player) {

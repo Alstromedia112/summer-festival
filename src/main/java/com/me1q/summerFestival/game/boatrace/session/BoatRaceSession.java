@@ -2,6 +2,7 @@ package com.me1q.summerFestival.game.boatrace.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.banner.BannerManager;
 import com.me1q.summerFestival.game.boatrace.constants.Config;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
 import com.me1q.summerFestival.game.boatrace.constants.Messages;
@@ -17,7 +18,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,15 +29,21 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class BoatRaceSession {
 
-
     private final SummerFestival plugin;
     private final List<Player> participants;
+    private final List<Player> spectators;
     private final Player organizer;
     private final Runnable onComplete;
     private final GoalLine goalLine;
+    private final List<Location> boatStandLocations;
 
     private final Map<Player, Long> finishTimes;
     private final List<Player> rankings;
+    private final Map<Player, Integer> playerLaps;
+    private final Map<Player, Long> lastGoalCrossTime;
+    private final List<Boat> spawnedBoats;
+    private final Map<Player, org.bukkit.GameMode> previousGameModes;
+    private final BannerManager bannerManager;
 
     private boolean isActive;
     private boolean raceStarted;
@@ -42,14 +52,22 @@ public class BoatRaceSession {
     private BoatRaceListener raceListener;
 
     public BoatRaceSession(SummerFestival plugin, List<Player> participants,
-        Player organizer, GoalLine goalLine, Runnable onComplete) {
+        List<Player> spectators, Player organizer, GoalLine goalLine,
+        List<Location> boatStandLocations, Runnable onComplete) {
         this.plugin = plugin;
         this.participants = new ArrayList<>(participants);
+        this.spectators = new ArrayList<>(spectators);
         this.organizer = organizer;
         this.goalLine = goalLine;
+        this.boatStandLocations = new ArrayList<>(boatStandLocations);
         this.onComplete = onComplete;
         this.finishTimes = new HashMap<>();
         this.rankings = new ArrayList<>();
+        this.playerLaps = new HashMap<>();
+        this.lastGoalCrossTime = new HashMap<>();
+        this.spawnedBoats = new ArrayList<>();
+        this.previousGameModes = new HashMap<>();
+        this.bannerManager = new BannerManager();
         this.isActive = false;
         this.raceStarted = false;
     }
@@ -64,6 +82,10 @@ public class BoatRaceSession {
 
         raceListener = new BoatRaceListener(this);
         Bukkit.getPluginManager().registerEvents(raceListener, plugin);
+
+        setupSpectators();
+        assignAndEquipBanners();
+        spawnBoats();
 
         broadcastToParticipants(MessageBuilder.header(Message.RACE_STARTED.text()));
         broadcastToParticipants(
@@ -86,6 +108,9 @@ public class BoatRaceSession {
             raceListener = null;
         }
 
+        restoreSpectators();
+        removeBanners();
+        removeBoats();
         showFinalResults();
         onComplete.run();
     }
@@ -116,6 +141,14 @@ public class BoatRaceSession {
                                 1.0f);
                         }
                     }
+                    for (Player spectator : spectators) {
+                        if (spectator.isOnline()) {
+                            spectator.showTitle(title);
+                            spectator.playSound(spectator.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT,
+                                1.0f,
+                                1.0f);
+                        }
+                    }
                     countdown[0]--;
                 } else {
                     Title title = Title.title(
@@ -129,6 +162,14 @@ public class BoatRaceSession {
                         if (player.isOnline()) {
                             player.showTitle(title);
                             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,
+                                1.0f, 2.0f);
+                        }
+                    }
+                    for (Player spectator : spectators) {
+                        if (spectator.isOnline()) {
+                            spectator.showTitle(title);
+                            spectator.playSound(spectator.getLocation(),
+                                Sound.BLOCK_NOTE_BLOCK_BELL,
                                 1.0f, 2.0f);
                         }
                     }
@@ -146,6 +187,91 @@ public class BoatRaceSession {
         if (countdownTask != null) {
             countdownTask.cancel();
         }
+    }
+
+    private void setupSpectators() {
+        for (Player spectator : spectators) {
+            if (spectator.isOnline()) {
+                previousGameModes.put(spectator, spectator.getGameMode());
+                spectator.setGameMode(org.bukkit.GameMode.SPECTATOR);
+                spectator.sendMessage(MessageBuilder.success("観戦者モードに設定されました"));
+            }
+        }
+    }
+
+    private void assignAndEquipBanners() {
+        bannerManager.assignBanners(participants);
+        bannerManager.equipBanners();
+
+        broadcastToParticipants(MessageBuilder.success("チームの旗を装備しました！"));
+    }
+
+    private void removeBanners() {
+        bannerManager.removeBanners();
+    }
+
+    private void restoreSpectators() {
+        for (Player spectator : spectators) {
+            if (spectator.isOnline()) {
+                org.bukkit.GameMode previousMode = previousGameModes.get(spectator);
+                if (previousMode != null) {
+                    spectator.setGameMode(previousMode);
+                    spectator.sendMessage(MessageBuilder.info("ゲームモードが復元されました"));
+                }
+            }
+        }
+        previousGameModes.clear();
+    }
+
+    private void spawnBoats() {
+        if (boatStandLocations.isEmpty()) {
+            broadcastToParticipants(
+                MessageBuilder.warning("ボートスタンドが設定されていません"));
+            return;
+        }
+
+        int participantIndex = 0;
+        for (Location location : boatStandLocations) {
+            if (location == null || location.getWorld() == null) {
+                continue;
+            }
+
+            if (participantIndex >= participants.size()) {
+                break;
+            }
+
+            Location boatLocation = location.clone().add(0, 0.5, 0);
+            Boat boat = (Boat) location.getWorld().spawnEntity(boatLocation, EntityType.OAK_BOAT);
+            boat.setGravity(true);
+            spawnedBoats.add(boat);
+
+            Player participant = participants.get(participantIndex);
+            if (participant.isOnline()) {
+                boat.addPassenger(participant);
+                participant.sendMessage(
+                    MessageBuilder.success("ボートに乗りました！カウントダウンをお待ちください"));
+            }
+
+            participantIndex++;
+        }
+
+        if (participantIndex < participants.size()) {
+            broadcastToParticipants(
+                MessageBuilder.warning(
+                    "ボートスタンドの数が参加者数より少ないため、一部のプレイヤーはボートに乗れませんでした"));
+        }
+
+        broadcastToParticipants(
+            MessageBuilder.info("ボートが出現しました！レースに備えてください"));
+    }
+
+    private void removeBoats() {
+        for (Boat boat : spawnedBoats) {
+            if (boat != null && boat.isValid()) {
+                boat.remove();
+            }
+        }
+        spawnedBoats.clear();
     }
 
     private void showFinalResults() {
@@ -196,6 +322,11 @@ public class BoatRaceSession {
                 p.sendMessage(message);
             }
         });
+        spectators.forEach(p -> {
+            if (p.isOnline()) {
+                p.sendMessage(message);
+            }
+        });
     }
 
     public boolean isActive() {
@@ -218,8 +349,36 @@ public class BoatRaceSession {
         return goalLine;
     }
 
-    public void recordFinish(Player player) {
+    public void recordGoalLineCross(Player player) {
         if (finishTimes.containsKey(player)) {
+            return;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        long delayMillis = SummerFestival.getInstance().getConfigManager()
+            .getBoatRaceGoalDetectionDelaySeconds() * 1000L;
+
+        Long lastCrossTime = lastGoalCrossTime.get(player);
+        if (lastCrossTime != null && (currentTime - lastCrossTime) < delayMillis) {
+            return;
+        }
+
+        int requiredLaps = SummerFestival.getInstance().getConfigManager().getBoatRaceLaps();
+        int currentLap = playerLaps.getOrDefault(player, 0) + 1;
+        playerLaps.put(player, currentLap);
+        lastGoalCrossTime.put(player, currentTime);
+
+        if (currentLap < requiredLaps) {
+            Component lapMessage = Component.text(player.getName()).color(NamedTextColor.AQUA)
+                .append(Component.text(" が").color(NamedTextColor.GRAY))
+                .append(Component.text(currentLap + "周目").color(NamedTextColor.YELLOW))
+                .append(Component.text("を通過！").color(NamedTextColor.GRAY));
+            broadcastToParticipants(lapMessage);
+
+            player.showTitle(
+                Title.title(Component.text(""), Component.text(currentLap + "/" + requiredLaps)));
+
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
             return;
         }
 
@@ -257,5 +416,15 @@ public class BoatRaceSession {
 
     public boolean hasFinished(Player player) {
         return finishTimes.containsKey(player);
+    }
+
+    public boolean canDetectGoal() {
+        if (!raceStarted) {
+            return false;
+        }
+        long elapsedMillis = System.currentTimeMillis() - startTime;
+        long delaySeconds = SummerFestival.getInstance().getConfigManager()
+            .getBoatRaceGoalDetectionDelaySeconds();
+        return elapsedMillis >= (delaySeconds * 1000L);
     }
 }
