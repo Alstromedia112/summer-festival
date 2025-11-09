@@ -273,5 +273,9 @@ public class TagSession {
     public boolean isActive() {
         return active;
     }
+
+    public boolean isTagger(Player player) {
+        return taggers.contains(player);
+    }
 }
 

@@ -4,9 +4,13 @@ import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
+import com.me1q.summerFestival.game.tag.itemstand.ItemStandManager;
+import com.me1q.summerFestival.game.tag.itemstand.listener.ItemStandListener;
+import com.me1q.summerFestival.game.tag.listener.EquipmentEffectListener;
 import com.me1q.summerFestival.game.tag.session.TagRecruitSession;
 import com.me1q.summerFestival.game.tag.session.TagSession;
 import java.util.List;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,11 +21,29 @@ public class TagManager implements Listener {
 
 
     private final SummerFestival plugin;
+    private final ItemStandManager itemStandManager;
     private TagSession activeSession;
     private TagRecruitSession recruitSession;
 
     public TagManager(SummerFestival plugin) {
         this.plugin = plugin;
+        this.itemStandManager = new ItemStandManager();
+        registerListeners();
+    }
+
+    private void registerListeners() {
+        Bukkit.getPluginManager().registerEvents(
+            new ItemStandListener(itemStandManager, this, plugin), plugin);
+        Bukkit.getPluginManager().registerEvents(
+            new EquipmentEffectListener(this), plugin);
+    }
+
+    public ItemStandManager getItemStandManager() {
+        return itemStandManager;
+    }
+
+    public TagSession getActiveSession() {
+        return activeSession;
     }
 
     public void startRecruit(Player starter, int duration) {
@@ -67,7 +89,7 @@ public class TagManager implements Listener {
             starter.sendMessage(MessageBuilder.error(TagMessage.ALREADY_STARTED.text()));
             return;
         }
- 
+
         if (!isRecruitActive()) {
             starter.sendMessage(
                 MessageBuilder.error(TagMessage.START_RECRUITMENT_FIRST.text()));
