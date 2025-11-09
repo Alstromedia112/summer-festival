@@ -59,11 +59,15 @@ public class TagManager implements Listener {
     }
 
     public void startGame(Player starter) {
+        startGame(starter, null);
+    }
+
+    public void startGame(Player starter, List<Player> initialTaggers) {
         if (isGameActive()) {
             starter.sendMessage(MessageBuilder.error(TagMessage.ALREADY_STARTED.text()));
             return;
         }
-
+ 
         if (!isRecruitActive()) {
             starter.sendMessage(
                 MessageBuilder.error(TagMessage.START_RECRUITMENT_FIRST.text()));
@@ -76,11 +80,27 @@ public class TagManager implements Listener {
             return;
         }
 
+        if (initialTaggers != null && !initialTaggers.isEmpty()) {
+            for (Player tagger : initialTaggers) {
+                if (!players.contains(tagger)) {
+                    starter.sendMessage(MessageBuilder.error(
+                        tagger.getName() + "は募集に参加していません。"));
+                    return;
+                }
+            }
+
+            if (initialTaggers.size() >= players.size()) {
+                starter.sendMessage(MessageBuilder.error(
+                    "鬼の人数が参加者数以上です。少なくとも1人は逃げ側にする必要があります。"));
+                return;
+            }
+        }
+
         int duration = recruitSession.getGameDuration();
         recruitSession.stop();
         recruitSession = null;
 
-        activeSession = new TagSession(plugin, players, duration);
+        activeSession = new TagSession(plugin, players, duration, initialTaggers);
         activeSession.start();
     }
 

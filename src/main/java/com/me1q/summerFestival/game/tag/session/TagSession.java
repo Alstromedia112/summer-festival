@@ -40,6 +40,11 @@ public class TagSession {
     private int timeRemaining;
 
     public TagSession(SummerFestival plugin, List<Player> players, int duration) {
+        this(plugin, players, duration, null);
+    }
+
+    public TagSession(SummerFestival plugin, List<Player> players, int duration,
+        List<Player> initialTaggers) {
         this.plugin = plugin;
         this.runners = new HashSet<>();
         this.taggers = new HashSet<>();
@@ -47,10 +52,14 @@ public class TagSession {
         this.timeRemaining = duration;
         this.active = false;
 
-        initializeRoles(players);
+        if (initialTaggers == null || initialTaggers.isEmpty()) {
+            initializeRolesRandomly(players);
+        } else {
+            initializeRolesWithTaggers(players, initialTaggers);
+        }
     }
 
-    private void initializeRoles(List<Player> players) {
+    private void initializeRolesRandomly(List<Player> players) {
         Collections.shuffle(players);
         Player firstTagger = players.getFirst();
 
@@ -61,6 +70,20 @@ public class TagSession {
             Player runner = players.get(i);
             runners.add(runner);
             playerRoles.put(runner, PlayerRole.RUNNER);
+        }
+    }
+
+    private void initializeRolesWithTaggers(List<Player> players, List<Player> initialTaggers) {
+        Set<Player> taggerSet = new HashSet<>(initialTaggers);
+
+        for (Player player : players) {
+            if (taggerSet.contains(player)) {
+                taggers.add(player);
+                playerRoles.put(player, PlayerRole.TAGGER);
+            } else {
+                runners.add(player);
+                playerRoles.put(player, PlayerRole.RUNNER);
+            }
         }
     }
 
