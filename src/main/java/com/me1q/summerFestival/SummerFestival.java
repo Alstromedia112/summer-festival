@@ -1,9 +1,11 @@
 package com.me1q.summerFestival;
 
 import com.me1q.summerFestival.commands.boatrace.BoatRaceCommand;
+import com.me1q.summerFestival.commands.currency.CurrencyCommand;
 import com.me1q.summerFestival.commands.shooting.ShootingCommand;
 import com.me1q.summerFestival.commands.tag.TagCommand;
 import com.me1q.summerFestival.core.config.ConfigManager;
+import com.me1q.summerFestival.currency.CurrencyManager;
 import com.me1q.summerFestival.game.boatrace.BoatRaceItemRegistrar;
 import com.me1q.summerFestival.game.shooting.button.ShootingButtonListener;
 import com.me1q.summerFestival.game.tag.TagItemRegistrar;
@@ -13,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class SummerFestival extends JavaPlugin {
 
     private ConfigManager configManager;
+    private CurrencyManager currencyManager;
 
     public static SummerFestival getInstance() {
         return JavaPlugin.getPlugin(SummerFestival.class);
@@ -22,9 +25,16 @@ public final class SummerFestival extends JavaPlugin {
         return configManager;
     }
 
+    public CurrencyManager getCurrencyManager() {
+        return currencyManager;
+    }
+
     @Override
     public void onEnable() {
         configManager = new ConfigManager(this);
+        currencyManager = new CurrencyManager();
+        getServer().getPluginManager().registerEvents(currencyManager, this);
+        registerCurrencyCommand();
         registerShootingGame();
         registerTagGame();
         registerBoatRaceGame();
@@ -35,6 +45,9 @@ public final class SummerFestival extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (currencyManager != null) {
+            currencyManager.shutdown();
+        }
         getLogger().info("Disabled SummerFestival Plugin.");
     }
 
@@ -71,6 +84,15 @@ public final class SummerFestival extends JavaPlugin {
         if (command != null) {
             command.setExecutor(boatRaceCommand);
             command.setTabCompleter(boatRaceCommand);
+        }
+    }
+
+    private void registerCurrencyCommand() {
+        CurrencyCommand currencyCommand = new CurrencyCommand(this);
+        PluginCommand command = getCommand("currency");
+        if (command != null) {
+            command.setExecutor(currencyCommand);
+            command.setTabCompleter(currencyCommand);
         }
     }
 }

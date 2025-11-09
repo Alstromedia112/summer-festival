@@ -128,10 +128,8 @@ public class BoatRaceRecruitSession {
     }
 
     private void broadcastSpectatorJoined(Player player) {
-        Component broadcast = Component.text(player.getName()).color(NamedTextColor.AQUA)
+        Component finalBroadcast = Component.text(player.getName()).color(NamedTextColor.AQUA)
             .append(Component.text(" が観戦者として参加しました").color(NamedTextColor.GRAY));
-
-        Component finalBroadcast = broadcast;
         participants.forEach(p -> p.sendMessage(finalBroadcast));
         spectators.forEach(p -> p.sendMessage(finalBroadcast));
     }
@@ -192,6 +190,7 @@ public class BoatRaceRecruitSession {
     }
 
     private void broadcastNoLotteryNeeded() {
+
         Component message = MessageBuilder.separator()
             .append(Component.newline())
             .append(
@@ -202,9 +201,7 @@ public class BoatRaceRecruitSession {
                 .color(NamedTextColor.AQUA))
             .append(Component.newline())
             .append(MessageBuilder.separator());
-
-        Component finalMessage = message;
-        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(finalMessage));
+        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(message));
 
         for (Player p : selectedParticipants) {
             p.sendMessage(MessageBuilder.separator());

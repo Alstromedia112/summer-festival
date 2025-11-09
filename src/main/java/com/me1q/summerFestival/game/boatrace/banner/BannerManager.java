@@ -162,9 +162,5 @@ public class BannerManager {
 
         return patterns;
     }
-
-    public PlayerBanner getPlayerBanner(Player player) {
-        return playerBanners.get(player);
-    }
 }
 

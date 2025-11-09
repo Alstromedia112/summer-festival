@@ -231,8 +231,4 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
         return completions;
     }
-
-    public BoatRaceManager getGameManager() {
-        return gameManager;
-    }
 }
