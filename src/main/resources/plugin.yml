@@ -22,6 +22,9 @@ commands:
     description: Manage currency
     usage: /<command> <balance|add|remove|set>
     aliases: [ money, cur ]
+  shop:
+    description: Manage shop
+    usage: /<command> <spawn|remove|open>
 
 permissions:
   summerfestival.shooting:
@@ -41,4 +44,13 @@ permissions:
     default: op
   summerfestival.currency.set:
     description: Permission to set currency
+    default: op
+  summerfestival.shop.spawn:
+    description: Permission to spawn shop villager
+    default: op
+  summerfestival.shop.remove:
+    description: Permission to remove shop villager
+    default: op
+  summerfestival.shop.admin:
+    description: Permission to manage shop items
     default: op

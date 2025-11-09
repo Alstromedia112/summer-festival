@@ -54,6 +54,10 @@ public class CurrencyManager implements Listener {
         return true;
     }
 
+    public boolean hasBalance(Player player, int amount) {
+        return getBalance(player) >= amount;
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
