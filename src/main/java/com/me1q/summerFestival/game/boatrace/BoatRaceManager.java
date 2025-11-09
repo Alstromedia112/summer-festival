@@ -7,6 +7,7 @@ import com.me1q.summerFestival.game.boatrace.boatstand.BoatStandMarkerItem;
 import com.me1q.summerFestival.game.boatrace.boatstand.listener.BoatStandListener;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
 import com.me1q.summerFestival.game.boatrace.constants.Messages;
+import com.me1q.summerFestival.game.boatrace.constants.RecruitmentMode;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager.GoalLine;
 import com.me1q.summerFestival.game.boatrace.goal.GoalMarkerItem;
@@ -49,7 +50,8 @@ public class BoatRaceManager {
             new BoatStandListener(boatStandManager), plugin);
     }
 
-    public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates) {
+    public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates,
+        RecruitmentMode mode) {
         if (isRecruitmentActive()) {
             organizer.sendMessage(
                 MessageBuilder.error(Message.ALREADY_RECRUITING.text()));
@@ -74,7 +76,7 @@ public class BoatRaceManager {
             Messages.recruitmentStarted(maxPlayers, organizerParticipates)));
 
         activeRecruitSession = new BoatRaceRecruitSession(organizer, maxPlayers,
-            organizerParticipates);
+            organizerParticipates, mode);
         activeRecruitSession.start();
     }
 
@@ -105,6 +107,34 @@ public class BoatRaceManager {
         activeRecruitSession = null;
     }
 
+    public void drawLottery(Player player) {
+        if (!isRecruitmentActive()) {
+            player.sendMessage(
+                MessageBuilder.error(Message.NO_RECRUITMENT.text()));
+            return;
+        }
+
+        if (!isOrganizer(player, activeRecruitSession.getOrganizer())) {
+            player.sendMessage(MessageBuilder.error(
+                Message.ONLY_ORGANIZER_CAN_CANCEL.text()));
+            return;
+        }
+
+        if (activeRecruitSession.getMode() != RecruitmentMode.LOTTERY) {
+            player.sendMessage(
+                MessageBuilder.error("抽選モードではありません"));
+            return;
+        }
+
+        if (activeRecruitSession.isLotteryDrawn()) {
+            player.sendMessage(
+                MessageBuilder.warning("すでに抽選が実施されています"));
+            return;
+        }
+
+        activeRecruitSession.performLottery();
+    }
+
     public void startRace(Player organizer) {
         if (!isRecruitmentActive()) {
             organizer.sendMessage(
@@ -120,6 +150,13 @@ public class BoatRaceManager {
 
         if (!RecruitmentValidator.validateMinParticipants(organizer,
             activeRecruitSession.getParticipantCount())) {
+            return;
+        }
+
+        if (activeRecruitSession.getMode() == RecruitmentMode.LOTTERY
+            && !activeRecruitSession.isLotteryDrawn()) {
+            organizer.sendMessage(MessageBuilder.error(
+                "抽選を実施してください (/boatrace draw)"));
             return;
         }
 
