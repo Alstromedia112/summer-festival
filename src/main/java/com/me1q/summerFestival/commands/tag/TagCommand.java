@@ -10,6 +10,7 @@ import com.me1q.summerFestival.game.tag.item.InvisiblePotion;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.SpeedPotion;
+import com.me1q.summerFestival.game.tag.itemstand.ItemStandMarkerItem;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -131,6 +132,7 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             case "potion_of_slowness" -> item = SlownessPotion.createItem();
             case "decoy" -> item = Decoy.createItem();
             case "smoke_launcher" -> item = SmokeLauncher.createItem();
+            case "item_stand" -> item = ItemStandMarkerItem.create();
             default -> item = ItemStack.of(Material.AIR);
         }
 
