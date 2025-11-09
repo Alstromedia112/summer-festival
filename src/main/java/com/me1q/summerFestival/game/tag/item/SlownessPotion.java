@@ -18,7 +18,8 @@ public class SlownessPotion {
         PotionMeta meta = (PotionMeta) potion.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("ポーソン").decoration(TextDecoration.ITALIC, false));
+            meta.displayName(
+                Component.text("鈍化ポーション").decoration(TextDecoration.ITALIC, false));
             meta.lore(Stream.of(
                 Component.text("右クリックで使用").color(NamedTextColor.GREEN),
                 Component.text("10秒間移動速度が低下する").color(NamedTextColor.GRAY)

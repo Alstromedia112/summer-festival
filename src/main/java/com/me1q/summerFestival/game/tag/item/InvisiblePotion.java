@@ -19,7 +19,7 @@ public class InvisiblePotion {
 
         if (meta != null) {
             meta.displayName(
-                Component.text("透明ポーソン").decoration(TextDecoration.ITALIC, false));
+                Component.text("透明ポーション").decoration(TextDecoration.ITALIC, false));
             meta.lore(Stream.of(
                 Component.text("右クリックで使用").color(NamedTextColor.GREEN),
                 Component.text("10秒間身体が透明になる").color(NamedTextColor.GRAY)
