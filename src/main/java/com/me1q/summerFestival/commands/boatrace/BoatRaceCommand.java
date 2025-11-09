@@ -5,6 +5,7 @@ import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.boatrace.BoatRaceManager;
 import com.me1q.summerFestival.game.boatrace.constants.Config;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
+import com.me1q.summerFestival.game.boatrace.constants.RecruitmentMode;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -18,8 +19,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
-    private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "getgoal",
-        "cleargoal", "getitemstand", "help"};
+    private static final String[] SUB_COMMANDS = {"recruit", "join", "draw", "start", "stop",
+        "getgoal",
+        "cleargoal", "getitemstand", "getboatstand", "clearboatstand", "help"};
 
     private final BoatRaceManager gameManager;
 
@@ -40,18 +42,28 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("join")) {
+            handleJoinCommand(player, args);
+        }
+
+        if (!player.isOp()) {
+            player.sendMessage(MessageBuilder.error("このコマンドを実行する権限がありません。"));
+            return true;
+        }
+
         switch (args[0].toLowerCase()) {
             case "recruit" -> handleRecruitCommand(player, args);
-            case "join" -> handleJoinCommand(player);
+            case "draw" -> handleDrawCommand(player);
             case "start" -> handleStartCommand(player);
             case "stop" -> handleStopCommand(player);
             case "getgoal" -> handleGetGoalCommand(player);
             case "cleargoal" -> handleClearGoalCommand(player);
             case "getitemstand" -> handleGetItemStandCommand(player);
+            case "getboatstand" -> handleGetBoatStandCommand(player);
+            case "clearboatstand" -> handleClearBoatStandCommand(player);
             case "help" -> showHelp(player);
             default -> {
-                player.sendMessage(MessageBuilder.error("不明なサブコマンド: " + args[0]));
-                showHelp(player);
+                player.sendMessage(MessageBuilder.error("不明なコマンド: " + args[0]));
             }
         }
 
@@ -92,11 +104,30 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        gameManager.startRecruit(player, maxPlayers, organizerParticipates);
+        RecruitmentMode mode = RecruitmentMode.FIRST_COME;
+        if (args.length > 3) {
+            RecruitmentMode parsedMode = RecruitmentMode.fromString(args[3]);
+            if (parsedMode == null) {
+                player.sendMessage(
+                    MessageBuilder.error("募集方式は first または lottery で指定してください"));
+                return;
+            }
+            mode = parsedMode;
+        }
+
+        gameManager.startRecruit(player, maxPlayers, organizerParticipates, mode);
     }
 
-    private void handleJoinCommand(Player player) {
-        gameManager.joinRecruit(player);
+    private void handleJoinCommand(Player player, String[] args) {
+        if (args.length > 1 && args[1].equalsIgnoreCase("spectator")) {
+            gameManager.joinRecruitAsSpectator(player);
+        } else {
+            gameManager.joinRecruit(player);
+        }
+    }
+
+    private void handleDrawCommand(Player player) {
+        gameManager.drawLottery(player);
     }
 
     private void handleStartCommand(Player player) {
@@ -116,6 +147,14 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         gameManager.giveItemStandMarker(player);
     }
 
+    private void handleGetBoatStandCommand(Player player) {
+        gameManager.giveBoatStandMarker(player);
+    }
+
+    private void handleClearBoatStandCommand(Player player) {
+        gameManager.clearBoatStands(player);
+    }
+
     private void handleStopCommand(Player player) {
         gameManager.stopRace(player);
     }
@@ -128,13 +167,24 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             .color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/boatrace getitemstand - アイテムスタンドマーカーを取得")
             .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace getboatstand - ボートスタンドマーカーを取得")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace clearboatstand - すべてのボートスタンドを削除")
+            .color(NamedTextColor.YELLOW));
         player.sendMessage(
-            Component.text("/boatrace recruit <people> <true/false> - レース参加者を募集")
+            Component.text(
+                    "/boatrace recruit <people> <true/false> <first/lottery> - レース参加者を募集")
                 .color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/boatrace recruit cancel - 募集をキャンセル")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text("/boatrace join - 募集中のレースに参加").color(NamedTextColor.YELLOW));
+        player.sendMessage(
+            Component.text("/boatrace join spectator - 観戦者として参加")
+                .color(NamedTextColor.YELLOW));
+        player.sendMessage(
+            Component.text("/boatrace draw - 抽選を実施 (抽選モードのみ)")
+                .color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text("/boatrace start - レースを開始").color(NamedTextColor.YELLOW));
         player.sendMessage(
@@ -170,14 +220,22 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
                 if ("false".startsWith(args[2].toLowerCase())) {
                     completions.add("false");
                 }
+            } else if (args.length == 4) {
+                if ("first".startsWith(args[3].toLowerCase())) {
+                    completions.add("first");
+                }
+                if ("lottery".startsWith(args[3].toLowerCase())) {
+                    completions.add("lottery");
+                }
+            }
+        } else if (args[0].equalsIgnoreCase("join")) {
+            if (args.length == 2) {
+                if ("spectator".startsWith(args[1].toLowerCase())) {
+                    completions.add("spectator");
+                }
             }
         }
 
         return completions;
     }
-
-    public BoatRaceManager getGameManager() {
-        return gameManager;
-    }
 }
-

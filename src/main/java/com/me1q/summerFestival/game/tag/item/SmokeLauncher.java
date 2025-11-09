@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class SmokeLauncher extends TagItemBase {
 
-    public ItemStack createItem() {
+    public static ItemStack createItem() {
         ItemStack windCharge = new ItemStack(Material.WIND_CHARGE);
         ItemMeta meta = windCharge.getItemMeta();
 

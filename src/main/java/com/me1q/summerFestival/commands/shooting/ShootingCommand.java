@@ -49,8 +49,17 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("start")) {
+            handleStartCommand(player, args);
+            return true;
+        }
+
+        if (!player.isOp()) {
+            player.sendMessage(MessageBuilder.error("このコマンドを実行する権限がありません。"));
+            return true;
+        }
+
         switch (args[0].toLowerCase()) {
-            case "start" -> handleStartCommand(player, args);
             case "stop" -> handleStopCommand(player);
             case "status" -> handleStatusCommand(player);
             case "setbutton" -> handleSetButtonCommand(player, args);

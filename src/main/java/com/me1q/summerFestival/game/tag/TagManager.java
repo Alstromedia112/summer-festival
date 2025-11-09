@@ -4,9 +4,13 @@ import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
+import com.me1q.summerFestival.game.tag.itemstand.ItemStandManager;
+import com.me1q.summerFestival.game.tag.itemstand.listener.ItemStandListener;
+import com.me1q.summerFestival.game.tag.listener.EquipmentEffectListener;
 import com.me1q.summerFestival.game.tag.session.TagRecruitSession;
 import com.me1q.summerFestival.game.tag.session.TagSession;
 import java.util.List;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,11 +21,29 @@ public class TagManager implements Listener {
 
 
     private final SummerFestival plugin;
+    private final ItemStandManager itemStandManager;
     private TagSession activeSession;
     private TagRecruitSession recruitSession;
 
     public TagManager(SummerFestival plugin) {
         this.plugin = plugin;
+        this.itemStandManager = new ItemStandManager();
+        registerListeners();
+    }
+
+    private void registerListeners() {
+        Bukkit.getPluginManager().registerEvents(
+            new ItemStandListener(itemStandManager, this, plugin), plugin);
+        Bukkit.getPluginManager().registerEvents(
+            new EquipmentEffectListener(this), plugin);
+    }
+
+    public ItemStandManager getItemStandManager() {
+        return itemStandManager;
+    }
+
+    public TagSession getActiveSession() {
+        return activeSession;
     }
 
     public void startRecruit(Player starter, int duration) {
@@ -59,6 +81,10 @@ public class TagManager implements Listener {
     }
 
     public void startGame(Player starter) {
+        startGame(starter, null);
+    }
+
+    public void startGame(Player starter, List<Player> initialTaggers) {
         if (isGameActive()) {
             starter.sendMessage(MessageBuilder.error(TagMessage.ALREADY_STARTED.text()));
             return;
@@ -76,11 +102,27 @@ public class TagManager implements Listener {
             return;
         }
 
+        if (initialTaggers != null && !initialTaggers.isEmpty()) {
+            for (Player tagger : initialTaggers) {
+                if (!players.contains(tagger)) {
+                    starter.sendMessage(MessageBuilder.error(
+                        tagger.getName() + "は募集に参加していません。"));
+                    return;
+                }
+            }
+
+            if (initialTaggers.size() >= players.size()) {
+                starter.sendMessage(MessageBuilder.error(
+                    "鬼の人数が参加者数以上です。少なくとも1人は逃げ側にする必要があります。"));
+                return;
+            }
+        }
+
         int duration = recruitSession.getGameDuration();
         recruitSession.stop();
         recruitSession = null;
 
-        activeSession = new TagSession(plugin, players, duration);
+        activeSession = new TagSession(plugin, players, duration, initialTaggers);
         activeSession.start();
     }
 

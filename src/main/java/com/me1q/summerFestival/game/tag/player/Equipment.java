@@ -1,5 +1,8 @@
 package com.me1q.summerFestival.game.tag.player;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -9,6 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public final class Equipment {
+
+    private static final Map<UUID, ItemStack> savedHelmets = new HashMap<>();
 
     private Equipment() {
         throw new UnsupportedOperationException("Utility class");
@@ -37,6 +42,24 @@ public final class Equipment {
 
     public static void clearInventory(Player player) {
         player.getInventory().setHelmet(ItemStack.empty());
+        savedHelmets.remove(player.getUniqueId());
+    }
+
+    public static void saveAndRemoveHelmet(Player player) {
+        ItemStack helmet = player.getInventory().getHelmet();
+        if (helmet != null && helmet.getType() != Material.AIR) {
+            savedHelmets.put(player.getUniqueId(), helmet.clone());
+            player.getInventory().setHelmet(ItemStack.empty());
+        }
+    }
+
+    public static void restoreHelmet(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (savedHelmets.containsKey(playerId)) {
+            ItemStack helmet = savedHelmets.get(playerId);
+            player.getInventory().setHelmet(helmet);
+            savedHelmets.remove(playerId);
+        }
     }
 }
 

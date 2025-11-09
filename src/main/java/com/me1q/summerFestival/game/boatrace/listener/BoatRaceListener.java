@@ -43,12 +43,16 @@ public class BoatRaceListener implements Listener {
             return;
         }
 
+        if (!raceSession.canDetectGoal()) {
+            return;
+        }
+
         Location fromLocation = event.getFrom();
         Location toLocation = event.getTo();
 
         if (goalLineDetector.hasPassedGoalLine(fromLocation, toLocation,
             raceSession.getGoalLine())) {
-            raceSession.recordFinish(player);
+            raceSession.recordGoalLineCross(player);
         }
     }
 }
