@@ -21,7 +21,7 @@ public class SmokeLauncher extends TagItemBase {
                 Component.text("スモークランチャー").decoration(TextDecoration.ITALIC, false));
             meta.lore(Stream.of(
                 Component.text("右クリックで使用").color(NamedTextColor.GREEN),
-                Component.text("周囲に煙幕を発生させ、視界を遮る").color(NamedTextColor.GRAY)
+                Component.text("周囲に煙幕を発生させ視界を遮る").color(NamedTextColor.GRAY)
             ).map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
             windCharge.setItemMeta(meta);
         }

@@ -1,5 +1,6 @@
 package com.me1q.summerFestival.game.tag.itemstand;
 
+import com.me1q.summerFestival.game.tag.item.DarknessPotion;
 import com.me1q.summerFestival.game.tag.item.Decoy;
 import com.me1q.summerFestival.game.tag.item.InvisiblePotion;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
@@ -22,13 +23,11 @@ public final class ItemStandRandomItemGenerator {
             InvisiblePotion.createItem(),
             SpeedPotion.createItem(),
             SlownessPotion.createItem(),
+            DarknessPotion.createItem(),
             Decoy.createItem(),
             SmokeLauncher.createItem()
         );
 
-        if (itemPool.isEmpty()) {
-            throw new IllegalStateException("Item pool is empty");
-        }
         return itemPool.get(RANDOM.nextInt(itemPool.size()));
     }
 }
