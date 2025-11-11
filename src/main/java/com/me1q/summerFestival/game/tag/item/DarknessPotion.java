@@ -26,7 +26,7 @@ public class DarknessPotion {
             ).map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
             meta.clearCustomEffects();
             meta.addCustomEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 10, 1), true);
-            meta.setColor(Color.WHITE);
+            meta.setColor(Color.BLACK);
             potion.setItemMeta(meta);
         }
 
