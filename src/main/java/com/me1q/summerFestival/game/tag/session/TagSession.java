@@ -142,7 +142,11 @@ public class TagSession {
                 + " 逃げ: " + runners.size()
         ).color(NamedTextColor.AQUA);
 
-        getAllPlayers().forEach(p -> p.sendActionBar(actionBar));
+        getAllPlayers().forEach(p -> {
+            p.sendActionBar(actionBar);
+            p.addPotionEffect(
+                new PotionEffect(PotionEffectType.SATURATION, 1, 0, false, false, false));
+        });
     }
 
 
