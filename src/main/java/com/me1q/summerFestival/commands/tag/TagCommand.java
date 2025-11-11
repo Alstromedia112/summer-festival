@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 public class TagCommand implements CommandExecutor, TabCompleter {
 
     private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "give",
-        "help"};
+        "returnpoint", "tpreturn", "help"};
 
     private final TagManager gameManager;
 
@@ -63,6 +63,8 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             case "start" -> handleStartCommand(player, args);
             case "stop" -> gameManager.stopGame(player);
             case "give" -> handleGiveCommand(player, args);
+            case "returnpoint" -> gameManager.giveReturnPointMarker(player);
+            case "tpreturn" -> gameManager.teleportToReturnPoint(player);
             default -> sendUsage(player);
         }
 
@@ -149,6 +151,22 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             Component.text("- 捕まった人は鬼になります").color(NamedTextColor.WHITE));
         player.sendMessage(Component.text("- 時間内に全員鬼にならなければ逃げ側の勝ち")
             .color(NamedTextColor.WHITE));
+        player.sendMessage(Component.text(""));
+        player.sendMessage(Component.text("コマンド:").color(NamedTextColor.AQUA));
+        player.sendMessage(Component.text("/tag recruit <時間> - 参加者を募集")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/tag join - 募集に参加")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/tag start [鬼...] - ゲームを開始")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/tag stop - ゲームを停止")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/tag returnpoint - リターンポイントマーカーを取得")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/tag tpreturn - 全プレイヤーをリターンポイントにTP")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/tag give <item> - アイテムを取得")
+            .color(NamedTextColor.YELLOW));
     }
 
     @Override

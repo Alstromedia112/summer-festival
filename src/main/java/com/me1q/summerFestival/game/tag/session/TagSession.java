@@ -248,8 +248,8 @@ public class TagSession {
         getAllPlayers().forEach(p -> p.sendMessage(message));
     }
 
-    private Set<Player> getAllPlayers() {
-        Set<Player> all = new HashSet<>();
+    public List<Player> getAllPlayers() {
+        List<Player> all = new java.util.ArrayList<>();
         all.addAll(taggers);
         all.addAll(runners);
         return all;
