@@ -27,12 +27,16 @@ public class ShootingManager implements Listener {
     private final CurrencyManager currencyManager;
     private final Map<Player, ShootingSession> activeSessions;
     private final Map<Player, TargetSpawner> playerSpawners;
+    private final Map<SpawnArea, Player> activeSpawnAreas;
+    private final Map<Player, SpawnArea> playerSpawnAreas;
 
     public ShootingManager(SummerFestival plugin, CurrencyManager currencyManager) {
         this.plugin = plugin;
         this.currencyManager = currencyManager;
         this.activeSessions = new HashMap<>();
         this.playerSpawners = new HashMap<>();
+        this.activeSpawnAreas = new HashMap<>();
+        this.playerSpawnAreas = new HashMap<>();
     }
 
     public void startGame(Player player, double x, double y, double z, double dx, double dy,
@@ -44,8 +48,18 @@ public class ShootingManager implements Listener {
 
         SpawnArea spawnArea = new SpawnArea(x, y, z, dx, dy, dz);
 
+        if (isSpawnAreaInUse(spawnArea)) {
+            Player usingPlayer = activeSpawnAreas.get(spawnArea);
+            player.sendMessage(MessageBuilder.error(
+                "この射的場は現在 " + usingPlayer.getName() + " が使用中です。"));
+            return;
+        }
+
         TargetSpawner spawner = new TargetSpawner(plugin);
         playerSpawners.put(player, spawner);
+
+        activeSpawnAreas.put(spawnArea, player);
+        playerSpawnAreas.put(player, spawnArea);
 
         ShootingSession session = new ShootingSession(player, plugin, currencyManager,
             () -> cleanupPlayerSession(player));
@@ -112,6 +126,11 @@ public class ShootingManager implements Listener {
     private void cleanupPlayerSession(Player player) {
         activeSessions.remove(player);
 
+        SpawnArea spawnArea = playerSpawnAreas.remove(player);
+        if (spawnArea != null) {
+            activeSpawnAreas.remove(spawnArea);
+        }
+
         TargetSpawner spawner = playerSpawners.remove(player);
         if (spawner != null) {
             spawner.stopSpawning();
@@ -126,6 +145,10 @@ public class ShootingManager implements Listener {
 
     public boolean isPlayerInGame(Player player) {
         return activeSessions.containsKey(player);
+    }
+
+    public boolean isSpawnAreaInUse(SpawnArea spawnArea) {
+        return activeSpawnAreas.containsKey(spawnArea);
     }
 }
 

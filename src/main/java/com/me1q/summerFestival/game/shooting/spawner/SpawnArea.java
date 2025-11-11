@@ -48,5 +48,34 @@ public class SpawnArea {
     public double getMaxZ() {
         return maxZ;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        SpawnArea other = (SpawnArea) obj;
+        return Double.compare(minX, other.minX) == 0
+            && Double.compare(minY, other.minY) == 0
+            && Double.compare(minZ, other.minZ) == 0
+            && Double.compare(maxX, other.maxX) == 0
+            && Double.compare(maxY, other.maxY) == 0
+            && Double.compare(maxZ, other.maxZ) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + Double.hashCode(minX);
+        result = 31 * result + Double.hashCode(minY);
+        result = 31 * result + Double.hashCode(minZ);
+        result = 31 * result + Double.hashCode(maxX);
+        result = 31 * result + Double.hashCode(maxY);
+        result = 31 * result + Double.hashCode(maxZ);
+        return result;
+    }
 }
 
