@@ -40,6 +40,7 @@ public final class SummerFestival extends JavaPlugin {
         configManager = new ConfigManager(this);
         currencyManager = new CurrencyManager();
         getServer().getPluginManager().registerEvents(currencyManager, this);
+        getServer().getPluginManager().registerEvents(currencyManager.getMovementListener(), this);
         registerCurrencyCommand();
         registerShop();
         registerShootingGame();

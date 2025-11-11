@@ -39,6 +39,7 @@ public class CurrencyCommand implements TabExecutor {
             case "add" -> handleAdd(sender, args);
             case "remove" -> handleRemove(sender, args);
             case "set" -> handleSet(sender, args);
+            case "setreward" -> handleSetReward(sender, args);
             default -> sendUsage(sender);
         }
 
@@ -186,6 +187,38 @@ public class CurrencyCommand implements TabExecutor {
             target.getName() + "の所持金を" + formattedAmount + "に設定しました。"));
     }
 
+    private void handleSetReward(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("summerfestival.currency.setreward")) {
+            sender.sendMessage(MessageBuilder.error("このコマンドを実行する権限がありません。"));
+            return;
+        }
+
+        if (args.length < 2) {
+            int currentReward = currencyManager.getMovementListener().getRewardAmount();
+            sender.sendMessage(MessageBuilder.success(
+                "現在の移動報酬: " + CurrencyFormatter.format(currentReward) + "/10m"));
+            sender.sendMessage(MessageBuilder.error("使用方法: /currency setreward <amount>"));
+            return;
+        }
+
+        int amount;
+        try {
+            amount = Integer.parseInt(args[1]);
+            if (amount < 0) {
+                sender.sendMessage(MessageBuilder.error("報酬額は0以上の整数を指定してください。"));
+                return;
+            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage(MessageBuilder.error("無効な報酬額です: " + args[1]));
+            return;
+        }
+
+        currencyManager.getMovementListener().setRewardAmount(amount);
+        String formattedAmount = CurrencyFormatter.format(amount);
+        sender.sendMessage(
+            MessageBuilder.success("移動報酬を" + formattedAmount + "/10mに設定しました。"));
+    }
+
     private void sendUsage(CommandSender sender) {
         sender.sendMessage(Component.text("=== 通貨コマンド ===").color(NamedTextColor.GOLD));
         sender.sendMessage(
@@ -196,6 +229,9 @@ public class CurrencyCommand implements TabExecutor {
             .color(NamedTextColor.YELLOW));
         sender.sendMessage(Component.text("/currency set <player> <amount> - 残高を設定")
             .color(NamedTextColor.YELLOW));
+        sender.sendMessage(
+            Component.text("/currency setreward <amount> - 移動報酬を設定（10m移動あたり）")
+                .color(NamedTextColor.YELLOW));
     }
 
     @Override
@@ -214,6 +250,9 @@ public class CurrencyCommand implements TabExecutor {
             if (sender.hasPermission("summerfestival.currency.set")) {
                 completions.add("set");
             }
+            if (sender.hasPermission("summerfestival.currency.setreward")) {
+                completions.add("setreward");
+            }
             return completions.stream()
                 .filter(s -> s.toLowerCase().startsWith(args[0].toLowerCase()))
                 .toList();
@@ -227,6 +266,14 @@ public class CurrencyCommand implements TabExecutor {
                     .map(Player::getName)
                     .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
                     .toList();
+            }
+            if (subCommand.equals("setreward")) {
+                completions.add("1");
+                completions.add("5");
+                completions.add("10");
+                completions.add("50");
+                completions.add("100");
+                return completions;
             }
         }
 
