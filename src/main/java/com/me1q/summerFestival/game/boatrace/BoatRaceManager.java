@@ -22,6 +22,7 @@ import com.me1q.summerFestival.game.boatrace.returnpoint.listener.ReturnPointMar
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceRecruitSession;
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceSession;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class BoatRaceManager {
@@ -185,7 +186,7 @@ public class BoatRaceManager {
             return;
         }
 
-        org.bukkit.Location returnPoint = returnPointManager.getReturnPoint(organizer);
+        Location returnPoint = returnPointManager.getReturnPoint();
         if (returnPoint == null) {
             organizer.sendMessage(MessageBuilder.error(
                 "リターンポイントを設置してください (/boatrace returnpoint)"));

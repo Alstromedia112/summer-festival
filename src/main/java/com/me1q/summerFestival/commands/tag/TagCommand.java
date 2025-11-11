@@ -7,9 +7,12 @@ import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
 import com.me1q.summerFestival.game.tag.item.Decoy;
 import com.me1q.summerFestival.game.tag.item.InvisiblePotion;
+import com.me1q.summerFestival.game.tag.item.RedHelmet;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.SpeedPotion;
+import com.me1q.summerFestival.game.tag.item.TaggerDetector;
+import com.me1q.summerFestival.game.tag.item.TaggerTeleporter;
 import com.me1q.summerFestival.game.tag.itemstand.ItemStandMarkerItem;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,6 +137,9 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             case "potion_of_slowness" -> item = SlownessPotion.createItem();
             case "decoy" -> item = Decoy.createItem();
             case "smoke_launcher" -> item = SmokeLauncher.createItem();
+            case "tagger_detector" -> item = TaggerDetector.createItem();
+            case "tagger_teleporter" -> item = TaggerTeleporter.createItem();
+            case "red_helmet" -> item = RedHelmet.createItem();
             case "item_stand" -> item = ItemStandMarkerItem.create();
             default -> item = ItemStack.of(Material.AIR);
         }
@@ -193,6 +199,23 @@ public class TagCommand implements CommandExecutor, TabCompleter {
                     if (duration.startsWith(args[1])) {
                         completions.add(duration);
                     }
+                }
+            }
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("give")) {
+            String[] items = {
+                "potion_of_invisibility",
+                "potion_of_speed",
+                "potion_of_slowness",
+                "decoy",
+                "smoke_launcher",
+                "tagger_detector",
+                "tagger_teleporter",
+                "red_helmet",
+                "item_stand"
+            };
+            for (String itemName : items) {
+                if (itemName.startsWith(args[1].toLowerCase())) {
+                    completions.add(itemName);
                 }
             }
         } else if (args[0].equalsIgnoreCase("start")) {

@@ -22,6 +22,7 @@ public final class SummerFestival extends JavaPlugin {
 
     private ConfigManager configManager;
     private CurrencyManager currencyManager;
+    private com.me1q.summerFestival.game.tag.TagManager tagManager;
 
     public static SummerFestival getInstance() {
         return JavaPlugin.getPlugin(SummerFestival.class);
@@ -33,6 +34,10 @@ public final class SummerFestival extends JavaPlugin {
 
     public CurrencyManager getCurrencyManager() {
         return currencyManager;
+    }
+
+    public com.me1q.summerFestival.game.tag.TagManager getTagManager() {
+        return tagManager;
     }
 
     @Override
@@ -78,6 +83,7 @@ public final class SummerFestival extends JavaPlugin {
 
     private void registerTagGame() {
         TagCommand tagCommand = new TagCommand(this);
+        this.tagManager = tagCommand.getGameManager();
         PluginCommand command = getCommand("tag");
         if (command != null) {
             command.setExecutor(tagCommand);

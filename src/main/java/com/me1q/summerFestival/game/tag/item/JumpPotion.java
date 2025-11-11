@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class DarknessPotion {
+public class JumpPotion {
 
     public static ItemStack createItem() {
         ItemStack potion = new ItemStack(Material.SPLASH_POTION);
@@ -19,14 +19,14 @@ public class DarknessPotion {
 
         if (meta != null) {
             meta.displayName(
-                Component.text("暗闇ポーション").decoration(TextDecoration.ITALIC, false));
+                Component.text("ジャンプポーション").decoration(TextDecoration.ITALIC, false));
             meta.lore(Stream.of(
                 Component.text("右クリックで使用").color(NamedTextColor.GREEN),
-                Component.text("10秒間周囲が見えなくなる").color(NamedTextColor.GRAY)
+                Component.text("10秒間ジャンプ力が上昇する").color(NamedTextColor.GRAY)
             ).map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
             meta.clearCustomEffects();
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 10, 1), true);
-            meta.setColor(Color.BLACK);
+            meta.addCustomEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 10, 3), true);
+            meta.setColor(Color.GREEN);
             potion.setItemMeta(meta);
         }
 

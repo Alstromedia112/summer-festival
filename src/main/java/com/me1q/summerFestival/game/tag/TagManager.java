@@ -14,6 +14,7 @@ import com.me1q.summerFestival.game.tag.session.TagRecruitSession;
 import com.me1q.summerFestival.game.tag.session.TagSession;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -47,6 +48,10 @@ public class TagManager implements Listener {
 
     public ItemStandManager getItemStandManager() {
         return itemStandManager;
+    }
+
+    public ReturnPointManager getReturnPointManager() {
+        return returnPointManager;
     }
 
     public TagSession getActiveSession() {
@@ -181,7 +186,7 @@ public class TagManager implements Listener {
     }
 
     public void teleportToReturnPoint(Player player) {
-        org.bukkit.Location returnPoint = returnPointManager.getReturnPoint(player);
+        Location returnPoint = returnPointManager.getReturnPoint();
 
         if (returnPoint == null) {
             player.sendMessage(MessageBuilder.error("リターンポイントが設定されていません"));

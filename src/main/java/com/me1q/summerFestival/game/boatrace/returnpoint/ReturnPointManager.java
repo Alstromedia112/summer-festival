@@ -1,33 +1,29 @@
 package com.me1q.summerFestival.game.boatrace.returnpoint;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 public class ReturnPointManager {
 
-    private final Map<UUID, Location> returnPoints;
+    private Location returnPoint;
 
     public ReturnPointManager() {
-        this.returnPoints = new HashMap<>();
+        this.returnPoint = null;
     }
 
-    public void setReturnPoint(Player player, Location location) {
-        returnPoints.put(player.getUniqueId(), location);
+    public void setReturnPoint(Location location) {
+        this.returnPoint = location;
     }
 
-    public Location getReturnPoint(Player player) {
-        return returnPoints.get(player.getUniqueId());
+    public Location getReturnPoint() {
+        return returnPoint;
     }
 
-    public boolean hasReturnPoint(Player player) {
-        return returnPoints.containsKey(player.getUniqueId());
+    public boolean hasReturnPoint() {
+        return returnPoint != null;
     }
 
-    public void clearReturnPoint(Player player) {
-        returnPoints.remove(player.getUniqueId());
+    public void clearReturnPoint() {
+        returnPoint = null;
     }
 }
 
