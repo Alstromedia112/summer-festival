@@ -2,6 +2,7 @@ package com.me1q.summerFestival.game.shooting.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.currency.CurrencyManager;
 import com.me1q.summerFestival.game.shooting.constants.ShootingAnnouncement;
 import com.me1q.summerFestival.game.shooting.constants.ShootingConfig;
 import com.me1q.summerFestival.game.shooting.constants.ShootingMessage;
@@ -20,15 +21,18 @@ public class ShootingSession {
 
     private final Player player;
     private final SummerFestival plugin;
+    private final CurrencyManager currencyManager;
     private final Runnable onComplete;
     private int score;
     private int timeRemaining;
     private boolean isActive;
     private BukkitTask countdownTask;
 
-    public ShootingSession(Player player, SummerFestival plugin, Runnable onComplete) {
+    public ShootingSession(Player player, SummerFestival plugin, CurrencyManager currencyManager,
+        Runnable onComplete) {
         this.player = player;
         this.plugin = plugin;
+        this.currencyManager = currencyManager;
         this.onComplete = onComplete;
         this.score = 0;
         this.timeRemaining = ShootingConfig.GAME_DURATION_SECONDS.value();
@@ -138,6 +142,11 @@ public class ShootingSession {
         player.sendMessage(MessageBuilder.header("ゲーム終了"));
         player.sendMessage(Component.text("あなたのスコア: ", NamedTextColor.YELLOW)
             .append(Component.text(score + " ポイント", NamedTextColor.GOLD)));
+
+        if (score > 0) {
+            currencyManager.addBalance(player, score);
+            player.sendMessage(MessageBuilder.success(score + "円を獲得しました！"));
+        }
 
         showRankMessage();
         broadcastScore();

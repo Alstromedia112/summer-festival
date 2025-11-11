@@ -2,6 +2,7 @@ package com.me1q.summerFestival.game.shooting;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.currency.CurrencyManager;
 import com.me1q.summerFestival.game.shooting.constants.ShootingConfig;
 import com.me1q.summerFestival.game.shooting.constants.ShootingMessage;
 import com.me1q.summerFestival.game.shooting.session.ShootingSession;
@@ -23,11 +24,13 @@ public class ShootingManager implements Listener {
 
 
     private final SummerFestival plugin;
+    private final CurrencyManager currencyManager;
     private final Map<Player, ShootingSession> activeSessions;
     private final Map<Player, TargetSpawner> playerSpawners;
 
-    public ShootingManager(SummerFestival plugin) {
+    public ShootingManager(SummerFestival plugin, CurrencyManager currencyManager) {
         this.plugin = plugin;
+        this.currencyManager = currencyManager;
         this.activeSessions = new HashMap<>();
         this.playerSpawners = new HashMap<>();
     }
@@ -44,7 +47,7 @@ public class ShootingManager implements Listener {
         TargetSpawner spawner = new TargetSpawner(plugin);
         playerSpawners.put(player, spawner);
 
-        ShootingSession session = new ShootingSession(player, plugin,
+        ShootingSession session = new ShootingSession(player, plugin, currencyManager,
             () -> cleanupPlayerSession(player));
         activeSessions.put(player, session);
         session.start();
