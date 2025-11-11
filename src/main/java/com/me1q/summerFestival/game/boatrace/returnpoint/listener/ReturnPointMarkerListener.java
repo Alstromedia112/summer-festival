@@ -34,7 +34,7 @@ public class ReturnPointMarkerListener implements Listener {
         event.setCancelled(true);
 
         Location location = event.getClickedBlock().getLocation().add(0.5, 1, 0.5);
-        returnPointManager.setReturnPoint(player, location);
+        returnPointManager.setReturnPoint(location);
 
         player.sendMessage(MessageBuilder.success("リターンポイントを設置しました"));
         player.sendMessage(MessageBuilder.info("座標: " +
