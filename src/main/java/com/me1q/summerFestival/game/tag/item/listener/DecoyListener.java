@@ -56,7 +56,9 @@ public class DecoyListener implements Listener {
         }
         decoy.getEquipment().setHelmet(head);
 
-        player.getInventory().removeItem(new ItemStack(Material.PLAYER_HEAD, 1));
+        ItemStack mainhandItem = player.getInventory().getItemInMainHand();
+
+        mainhandItem.setAmount(mainhandItem.getAmount() - 1);
 
         Bukkit.getScheduler().runTaskLater(SummerFestival.getInstance(), () -> {
             if (!decoy.isDead()) {
