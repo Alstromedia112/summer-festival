@@ -2,6 +2,7 @@ package com.me1q.summerFestival.game.tag;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.game.tag.item.Decoy;
+import com.me1q.summerFestival.game.tag.item.RedHelmet;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.TagItemBase;
 import com.me1q.summerFestival.game.tag.item.TaggerDetector;
@@ -18,7 +19,8 @@ public final class TagItemRegistrar {
         List<TagItemBase> items = List.of(
             new SmokeLauncher(),
             new Decoy(),
-            new TaggerDetector()
+            new TaggerDetector(),
+            new RedHelmet()
         );
 
         items.forEach(item -> {

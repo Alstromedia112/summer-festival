@@ -5,6 +5,7 @@ import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.tag.constants.TagAnnouncement;
 import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
+import com.me1q.summerFestival.game.tag.item.listener.RedHelmetListener;
 import com.me1q.summerFestival.game.tag.player.Equipment;
 import com.me1q.summerFestival.game.tag.player.PlayerRole;
 import java.time.Duration;
@@ -245,6 +246,7 @@ public class TagSession {
     }
 
     private void cleanup() {
+        RedHelmetListener.cleanupAll();
         getAllPlayers().forEach(Equipment::clearInventory);
     }
 
@@ -260,6 +262,7 @@ public class TagSession {
     }
 
     public void removePlayer(Player player) {
+        RedHelmetListener.cleanup(player);
         taggers.remove(player);
         runners.remove(player);
         playerRoles.remove(player);

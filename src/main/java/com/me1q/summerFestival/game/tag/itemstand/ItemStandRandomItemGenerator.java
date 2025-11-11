@@ -4,6 +4,7 @@ import com.me1q.summerFestival.game.tag.item.DarknessPotion;
 import com.me1q.summerFestival.game.tag.item.Decoy;
 import com.me1q.summerFestival.game.tag.item.InvisiblePotion;
 import com.me1q.summerFestival.game.tag.item.JumpPotion;
+import com.me1q.summerFestival.game.tag.item.RedHelmet;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.SpeedPotion;
@@ -29,7 +30,8 @@ public final class ItemStandRandomItemGenerator {
             DarknessPotion.createItem(),
             Decoy.createItem(),
             SmokeLauncher.createItem(),
-            TaggerDetector.createItem()
+            TaggerDetector.createItem(),
+            RedHelmet.createItem()
         );
 
         return itemPool.get(RANDOM.nextInt(itemPool.size()));

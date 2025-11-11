@@ -7,6 +7,7 @@ import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
 import com.me1q.summerFestival.game.tag.item.Decoy;
 import com.me1q.summerFestival.game.tag.item.InvisiblePotion;
+import com.me1q.summerFestival.game.tag.item.RedHelmet;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.SpeedPotion;
@@ -135,7 +136,8 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             case "potion_of_slowness" -> item = SlownessPotion.createItem();
             case "decoy" -> item = Decoy.createItem();
             case "smoke_launcher" -> item = SmokeLauncher.createItem();
-            case "oni_detector" -> item = TaggerDetector.createItem();
+            case "tagger_detector" -> item = TaggerDetector.createItem();
+            case "red_helmet" -> item = RedHelmet.createItem();
             case "item_stand" -> item = ItemStandMarkerItem.create();
             default -> item = ItemStack.of(Material.AIR);
         }
@@ -204,7 +206,8 @@ public class TagCommand implements CommandExecutor, TabCompleter {
                 "potion_of_slowness",
                 "decoy",
                 "smoke_launcher",
-                "oni_detector",
+                "tagger_detector",
+                "red_helmet",
                 "item_stand"
             };
             for (String itemName : items) {
