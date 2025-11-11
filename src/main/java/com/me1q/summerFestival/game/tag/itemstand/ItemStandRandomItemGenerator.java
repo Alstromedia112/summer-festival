@@ -7,6 +7,7 @@ import com.me1q.summerFestival.game.tag.item.JumpPotion;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
 import com.me1q.summerFestival.game.tag.item.SpeedPotion;
+import com.me1q.summerFestival.game.tag.item.TaggerDetector;
 import java.util.List;
 import java.util.Random;
 import org.bukkit.inventory.ItemStack;
@@ -27,7 +28,8 @@ public final class ItemStandRandomItemGenerator {
             SlownessPotion.createItem(),
             DarknessPotion.createItem(),
             Decoy.createItem(),
-            SmokeLauncher.createItem()
+            SmokeLauncher.createItem(),
+            TaggerDetector.createItem()
         );
 
         return itemPool.get(RANDOM.nextInt(itemPool.size()));
