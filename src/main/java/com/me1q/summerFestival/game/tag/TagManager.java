@@ -49,6 +49,10 @@ public class TagManager implements Listener {
         return itemStandManager;
     }
 
+    public ReturnPointManager getReturnPointManager() {
+        return returnPointManager;
+    }
+
     public TagSession getActiveSession() {
         return activeSession;
     }
@@ -181,7 +185,7 @@ public class TagManager implements Listener {
     }
 
     public void teleportToReturnPoint(Player player) {
-        org.bukkit.Location returnPoint = returnPointManager.getReturnPoint(player);
+        org.bukkit.Location returnPoint = returnPointManager.getReturnPoint();
 
         if (returnPoint == null) {
             player.sendMessage(MessageBuilder.error("リターンポイントが設定されていません"));
