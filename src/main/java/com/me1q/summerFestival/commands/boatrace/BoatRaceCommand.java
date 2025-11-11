@@ -26,7 +26,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
     private final BoatRaceManager gameManager;
 
     public BoatRaceCommand(SummerFestival plugin) {
-        this.gameManager = new BoatRaceManager(plugin);
+        this.gameManager = new BoatRaceManager(plugin, plugin.getCurrencyManager());
     }
 
     @Override

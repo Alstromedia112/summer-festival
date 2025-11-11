@@ -32,5 +32,4 @@ public class InvisiblePotion {
 
         return potion;
     }
-
 }

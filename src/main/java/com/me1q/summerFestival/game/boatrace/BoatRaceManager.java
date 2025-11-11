@@ -2,6 +2,7 @@ package com.me1q.summerFestival.game.boatrace;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.currency.CurrencyManager;
 import com.me1q.summerFestival.game.boatrace.boatstand.BoatStandManager;
 import com.me1q.summerFestival.game.boatrace.boatstand.BoatStandMarkerItem;
 import com.me1q.summerFestival.game.boatrace.boatstand.listener.BoatStandListener;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Player;
 public class BoatRaceManager {
 
     private final SummerFestival plugin;
+    private final CurrencyManager currencyManager;
     private final GoalLineManager goalLineManager;
     private final ItemStandManager itemStandManager;
     private final BoatStandManager boatStandManager;
@@ -30,8 +32,9 @@ public class BoatRaceManager {
     private BoatRaceRecruitSession activeRecruitSession;
     private BoatRaceSession activeRaceSession;
 
-    public BoatRaceManager(SummerFestival plugin) {
+    public BoatRaceManager(SummerFestival plugin, CurrencyManager currencyManager) {
         this.plugin = plugin;
+        this.currencyManager = currencyManager;
         this.goalLineManager = new GoalLineManager(plugin);
         this.itemStandManager = new ItemStandManager();
         this.boatStandManager = new BoatStandManager();
@@ -179,6 +182,7 @@ public class BoatRaceManager {
 
         activeRaceSession = new BoatRaceSession(
             plugin,
+            currencyManager,
             activeRecruitSession.getParticipants(),
             activeRecruitSession.getSpectators(),
             organizer,

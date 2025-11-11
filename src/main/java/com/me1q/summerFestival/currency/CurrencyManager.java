@@ -15,10 +15,16 @@ public class CurrencyManager implements Listener {
 
     private final Map<UUID, Integer> balances;
     private final CurrencyScoreboard scoreboard;
+    private final PlayerMovementListener movementListener;
 
     public CurrencyManager() {
         this.balances = new HashMap<>();
         this.scoreboard = new CurrencyScoreboard();
+        this.movementListener = new PlayerMovementListener(this);
+    }
+
+    public PlayerMovementListener getMovementListener() {
+        return movementListener;
     }
 
     public int getBalance(Player player) {
@@ -72,6 +78,7 @@ public class CurrencyManager implements Listener {
     }
 
     public void shutdown() {
+        movementListener.shutdown();
         scoreboard.clearAll();
         balances.clear();
     }

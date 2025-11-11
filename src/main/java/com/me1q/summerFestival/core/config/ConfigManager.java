@@ -25,12 +25,12 @@ public class ConfigManager {
 
     public int getBoatRaceGoalDetectionDelaySeconds() {
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-        return config.getInt("boatrace.goal-detection-delay-seconds", 3);
+        return config.getInt("boatrace.goal-detection-delay-seconds", 30);
     }
 
     public int getBoatRaceLaps() {
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-        return config.getInt("boatrace.laps", 3);
+        return config.getInt("boatrace.laps", 2);
     }
 }
 

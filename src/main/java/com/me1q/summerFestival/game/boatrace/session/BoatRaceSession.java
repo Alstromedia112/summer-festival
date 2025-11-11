@@ -2,6 +2,7 @@ package com.me1q.summerFestival.game.boatrace.session;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.currency.CurrencyManager;
 import com.me1q.summerFestival.game.boatrace.banner.BannerManager;
 import com.me1q.summerFestival.game.boatrace.constants.Config;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
@@ -30,6 +31,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class BoatRaceSession {
 
     private final SummerFestival plugin;
+    private final CurrencyManager currencyManager;
     private final List<Player> participants;
     private final List<Player> spectators;
     private final Player organizer;
@@ -51,10 +53,11 @@ public class BoatRaceSession {
     private BukkitTask countdownTask;
     private BoatRaceListener raceListener;
 
-    public BoatRaceSession(SummerFestival plugin, List<Player> participants,
-        List<Player> spectators, Player organizer, GoalLine goalLine,
+    public BoatRaceSession(SummerFestival plugin, CurrencyManager currencyManager,
+        List<Player> participants, List<Player> spectators, Player organizer, GoalLine goalLine,
         List<Location> boatStandLocations, Runnable onComplete) {
         this.plugin = plugin;
+        this.currencyManager = currencyManager;
         this.participants = new ArrayList<>(participants);
         this.spectators = new ArrayList<>(spectators);
         this.organizer = organizer;
@@ -389,12 +392,18 @@ public class BoatRaceSession {
         double timeSeconds = (finishTime - startTime) / 1000.0;
         int rank = rankings.size();
 
+        int reward = getRewardForRank(rank);
+        currencyManager.addBalance(player, reward);
+
         Component finishMessage = Component.text(player.getName()).color(NamedTextColor.AQUA)
             .append(Component.text(" がゴール！ ").color(NamedTextColor.GRAY))
             .append(Component.text(getRankText(rank) + "位").color(getRankColor(rank)))
             .append(Component.text(" - ").color(NamedTextColor.GRAY))
             .append(Component.text(Messages.finishTime(timeSeconds))
-                .color(NamedTextColor.YELLOW));
+                .color(NamedTextColor.YELLOW))
+            .append(Component.text(" (").color(NamedTextColor.GRAY))
+            .append(Component.text("+" + reward + "円").color(NamedTextColor.GOLD))
+            .append(Component.text(")").color(NamedTextColor.GRAY));
 
         broadcastToParticipants(finishMessage);
 
@@ -404,6 +413,9 @@ public class BoatRaceSession {
                     .color(NamedTextColor.AQUA)));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 
+        player.sendMessage(
+            MessageBuilder.success(reward + "円を獲得しました！"));
+
         if (rankings.size() >= participants.size()) {
             new BukkitRunnable() {
                 @Override
@@ -412,6 +424,15 @@ public class BoatRaceSession {
                 }
             }.runTaskLater(plugin, Config.RESULT_DISPLAY_DELAY_TICKS.value());
         }
+    }
+
+    private int getRewardForRank(int rank) {
+        return switch (rank) {
+            case 1 -> Config.REWARD_FIRST_PLACE.value();
+            case 2 -> Config.REWARD_SECOND_PLACE.value();
+            case 3 -> Config.REWARD_THIRD_PLACE.value();
+            default -> Config.REWARD_OTHER_PLACE.value();
+        };
     }
 
     public boolean hasFinished(Player player) {

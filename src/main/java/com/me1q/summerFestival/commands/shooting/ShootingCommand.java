@@ -31,7 +31,7 @@ public class ShootingCommand implements CommandExecutor, TabCompleter {
     private final ButtonDataManager buttonDataManager;
 
     public ShootingCommand(SummerFestival plugin) {
-        this.gameManager = new ShootingManager(plugin);
+        this.gameManager = new ShootingManager(plugin, plugin.getCurrencyManager());
         this.buttonDataManager = new ButtonDataManager(plugin);
     }
 
