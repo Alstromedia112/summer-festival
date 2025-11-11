@@ -7,6 +7,7 @@ import com.me1q.summerFestival.game.boatrace.banner.BannerManager;
 import com.me1q.summerFestival.game.boatrace.constants.Config;
 import com.me1q.summerFestival.game.boatrace.constants.Message;
 import com.me1q.summerFestival.game.boatrace.constants.Messages;
+import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager;
 import com.me1q.summerFestival.game.boatrace.goal.GoalLineManager.GoalLine;
 import com.me1q.summerFestival.game.boatrace.listener.BoatRaceListener;
 import java.time.Duration;
@@ -32,12 +33,14 @@ public class BoatRaceSession {
 
     private final SummerFestival plugin;
     private final CurrencyManager currencyManager;
+    private final GoalLineManager goalLineManager;
     private final List<Player> participants;
     private final List<Player> spectators;
     private final Player organizer;
     private final Runnable onComplete;
     private final GoalLine goalLine;
     private final List<Location> boatStandLocations;
+    private final Location returnPoint;
 
     private final Map<Player, Long> finishTimes;
     private final List<Player> rankings;
@@ -54,15 +57,18 @@ public class BoatRaceSession {
     private BoatRaceListener raceListener;
 
     public BoatRaceSession(SummerFestival plugin, CurrencyManager currencyManager,
+        GoalLineManager goalLineManager,
         List<Player> participants, List<Player> spectators, Player organizer, GoalLine goalLine,
-        List<Location> boatStandLocations, Runnable onComplete) {
+        List<Location> boatStandLocations, Location returnPoint, Runnable onComplete) {
         this.plugin = plugin;
         this.currencyManager = currencyManager;
+        this.goalLineManager = goalLineManager;
         this.participants = new ArrayList<>(participants);
         this.spectators = new ArrayList<>(spectators);
         this.organizer = organizer;
         this.goalLine = goalLine;
         this.boatStandLocations = new ArrayList<>(boatStandLocations);
+        this.returnPoint = returnPoint;
         this.onComplete = onComplete;
         this.finishTimes = new HashMap<>();
         this.rankings = new ArrayList<>();
@@ -115,6 +121,10 @@ public class BoatRaceSession {
         removeBanners();
         removeBoats();
         showFinalResults();
+
+        goalLineManager.placeFencesForPlayer(organizer);
+        teleportPlayersToReturnPoint();
+
         onComplete.run();
     }
 
@@ -176,6 +186,8 @@ public class BoatRaceSession {
                                 1.0f, 2.0f);
                         }
                     }
+
+                    goalLineManager.removeFences(organizer);
 
                     raceStarted = true;
                     startTime = System.currentTimeMillis();
@@ -330,6 +342,26 @@ public class BoatRaceSession {
                 p.sendMessage(message);
             }
         });
+    }
+
+    private void teleportPlayersToReturnPoint() {
+        if (returnPoint == null) {
+            return;
+        }
+
+        for (Player participant : participants) {
+            if (participant.isOnline()) {
+                participant.teleport(returnPoint);
+            }
+        }
+
+        for (Player spectator : spectators) {
+            if (spectator.isOnline()) {
+                spectator.teleport(returnPoint);
+            }
+        }
+
+        broadcastToParticipants(MessageBuilder.success("リターンポイントにテレポートしました"));
     }
 
     public boolean isActive() {

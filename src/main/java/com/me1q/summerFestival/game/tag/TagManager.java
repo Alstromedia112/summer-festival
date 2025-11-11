@@ -2,6 +2,9 @@ package com.me1q.summerFestival.game.tag;
 
 import com.me1q.summerFestival.SummerFestival;
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.returnpoint.ReturnPointManager;
+import com.me1q.summerFestival.game.boatrace.returnpoint.ReturnPointMarkerItem;
+import com.me1q.summerFestival.game.boatrace.returnpoint.listener.ReturnPointMarkerListener;
 import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
 import com.me1q.summerFestival.game.tag.itemstand.ItemStandManager;
@@ -22,12 +25,14 @@ public class TagManager implements Listener {
 
     private final SummerFestival plugin;
     private final ItemStandManager itemStandManager;
+    private final ReturnPointManager returnPointManager;
     private TagSession activeSession;
     private TagRecruitSession recruitSession;
 
     public TagManager(SummerFestival plugin) {
         this.plugin = plugin;
         this.itemStandManager = new ItemStandManager();
+        this.returnPointManager = new ReturnPointManager();
         registerListeners();
     }
 
@@ -36,6 +41,8 @@ public class TagManager implements Listener {
             new ItemStandListener(itemStandManager, this, plugin), plugin);
         Bukkit.getPluginManager().registerEvents(
             new EquipmentEffectListener(this), plugin);
+        Bukkit.getPluginManager().registerEvents(
+            new ReturnPointMarkerListener(returnPointManager), plugin);
     }
 
     public ItemStandManager getItemStandManager() {
@@ -166,6 +173,39 @@ public class TagManager implements Listener {
 
     private boolean isRecruitActive() {
         return recruitSession != null && recruitSession.isActive();
+    }
+
+    public void giveReturnPointMarker(Player player) {
+        player.getInventory().addItem(ReturnPointMarkerItem.create());
+        player.sendMessage(MessageBuilder.success("リターンポイントマーカーを取得しました"));
+    }
+
+    public void teleportToReturnPoint(Player player) {
+        org.bukkit.Location returnPoint = returnPointManager.getReturnPoint(player);
+
+        if (returnPoint == null) {
+            player.sendMessage(MessageBuilder.error("リターンポイントが設定されていません"));
+            player.sendMessage(
+                MessageBuilder.warning("/tag returnpoint でマーカーを取得してください"));
+            return;
+        }
+
+        if (activeSession != null) {
+            List<Player> players = activeSession.getAllPlayers();
+            int teleportCount = 0;
+
+            for (Player p : players) {
+                if (p.isOnline()) {
+                    p.teleport(returnPoint);
+                    teleportCount++;
+                }
+            }
+
+            player.sendMessage(MessageBuilder.success(
+                teleportCount + "人のプレイヤーをリターンポイントにテレポートしました"));
+        } else {
+            player.sendMessage(MessageBuilder.error("アクティブなセッションがありません"));
+        }
     }
 }
 

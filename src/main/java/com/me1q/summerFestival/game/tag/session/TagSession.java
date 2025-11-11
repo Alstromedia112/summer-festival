@@ -142,7 +142,11 @@ public class TagSession {
                 + " 逃げ: " + runners.size()
         ).color(NamedTextColor.AQUA);
 
-        getAllPlayers().forEach(p -> p.sendActionBar(actionBar));
+        getAllPlayers().forEach(p -> {
+            p.sendActionBar(actionBar);
+            p.addPotionEffect(
+                new PotionEffect(PotionEffectType.SATURATION, 1, 0, false, false, false));
+        });
     }
 
 
@@ -248,8 +252,8 @@ public class TagSession {
         getAllPlayers().forEach(p -> p.sendMessage(message));
     }
 
-    private Set<Player> getAllPlayers() {
-        Set<Player> all = new HashSet<>();
+    public List<Player> getAllPlayers() {
+        List<Player> all = new java.util.ArrayList<>();
         all.addAll(taggers);
         all.addAll(runners);
         return all;
