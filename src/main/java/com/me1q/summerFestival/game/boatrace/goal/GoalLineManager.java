@@ -52,11 +52,13 @@ public class GoalLineManager {
     private final SummerFestival plugin;
     private final Map<UUID, List<ArmorStand>> goalLineMarkers;
     private final Map<UUID, GoalLine> playerGoalLines;
+    private final Map<UUID, List<Location>> goalLineFences;
 
     public GoalLineManager(SummerFestival plugin) {
         this.plugin = plugin;
         this.goalLineMarkers = new HashMap<>();
         this.playerGoalLines = new HashMap<>();
+        this.goalLineFences = new HashMap<>();
     }
 
     public ArmorStand createMarker(Location location, Player owner) {
@@ -87,12 +89,14 @@ public class GoalLineManager {
             ArmorStand marker1 = goalLineMarkers.get(playerId).get(0);
             ArmorStand marker2 = goalLineMarkers.get(playerId).get(1);
             playerGoalLines.put(playerId, new GoalLine(marker1, marker2));
+            placeFences(player);
         }
 
         return markerCount;
     }
 
     public void clearGoalLines(Player player) {
+        removeFences(player);
         List<ArmorStand> markers = goalLineMarkers.remove(player.getUniqueId());
         if (markers != null) {
             for (ArmorStand marker : markers) {
@@ -134,6 +138,73 @@ public class GoalLineManager {
                     Messages.markerDistance(distance)));
             }
         }
+    }
+
+    private void placeFences(Player player) {
+        GoalLine goalLine = playerGoalLines.get(player.getUniqueId());
+        if (goalLine == null || !goalLine.isValid()) {
+            return;
+        }
+
+        Location loc1 = goalLine.getMarker1().getLocation();
+        Location loc2 = goalLine.getMarker2().getLocation();
+
+        List<Location> fenceLocations = calculateFenceLocations(loc1, loc2);
+        goalLineFences.put(player.getUniqueId(), fenceLocations);
+
+        for (Location fenceLocation : fenceLocations) {
+            fenceLocation.getBlock().setType(org.bukkit.Material.OAK_FENCE);
+        }
+    }
+
+    public void placeFencesForPlayer(Player player) {
+        placeFences(player);
+    }
+
+    public void removeFences(Player player) {
+        List<Location> fenceLocations = goalLineFences.remove(player.getUniqueId());
+        if (fenceLocations != null) {
+            for (Location fenceLocation : fenceLocations) {
+                if (fenceLocation.getBlock().getType() == org.bukkit.Material.OAK_FENCE) {
+                    fenceLocation.getBlock().setType(org.bukkit.Material.AIR);
+                }
+            }
+        }
+    }
+
+    private List<Location> calculateFenceLocations(Location loc1, Location loc2) {
+        List<Location> locations = new ArrayList<>();
+
+        int x1 = loc1.getBlockX();
+        int y1 = loc1.getBlockY();
+        int z1 = loc1.getBlockZ();
+
+        int x2 = loc2.getBlockX();
+        int y2 = loc2.getBlockY();
+        int z2 = loc2.getBlockZ();
+
+        int dx = Math.abs(x2 - x1);
+        int dz = Math.abs(z2 - z1);
+
+        if (dx > dz) {
+            int minX = Math.min(x1, x2);
+            int maxX = Math.max(x1, x2);
+            int y = Math.max(y1, y2);
+
+            for (int x = minX; x <= maxX; x++) {
+                locations.add(new Location(loc1.getWorld(), x, y, z1));
+            }
+        } else {
+            int minZ = Math.min(z1, z2);
+            int maxZ = Math.max(z1, z2);
+            int y = Math.max(y1, y2);
+
+            for (int z = minZ; z <= maxZ; z++) {
+                locations.add(new Location(loc1.getWorld(), x1, y, z));
+            }
+        }
+
+        return locations;
     }
 }
 

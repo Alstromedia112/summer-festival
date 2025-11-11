@@ -16,6 +16,9 @@ import com.me1q.summerFestival.game.boatrace.itemstand.ItemStandManager;
 import com.me1q.summerFestival.game.boatrace.itemstand.ItemStandMarkerItem;
 import com.me1q.summerFestival.game.boatrace.itemstand.listener.ItemStandListener;
 import com.me1q.summerFestival.game.boatrace.listener.GoalMarkerListener;
+import com.me1q.summerFestival.game.boatrace.returnpoint.ReturnPointManager;
+import com.me1q.summerFestival.game.boatrace.returnpoint.ReturnPointMarkerItem;
+import com.me1q.summerFestival.game.boatrace.returnpoint.listener.ReturnPointMarkerListener;
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceRecruitSession;
 import com.me1q.summerFestival.game.boatrace.session.BoatRaceSession;
 import org.bukkit.Bukkit;
@@ -28,6 +31,7 @@ public class BoatRaceManager {
     private final GoalLineManager goalLineManager;
     private final ItemStandManager itemStandManager;
     private final BoatStandManager boatStandManager;
+    private final ReturnPointManager returnPointManager;
 
     private BoatRaceRecruitSession activeRecruitSession;
     private BoatRaceSession activeRaceSession;
@@ -38,6 +42,7 @@ public class BoatRaceManager {
         this.goalLineManager = new GoalLineManager(plugin);
         this.itemStandManager = new ItemStandManager();
         this.boatStandManager = new BoatStandManager();
+        this.returnPointManager = new ReturnPointManager();
         this.activeRecruitSession = null;
         this.activeRaceSession = null;
 
@@ -51,6 +56,8 @@ public class BoatRaceManager {
             new ItemStandListener(itemStandManager), plugin);
         Bukkit.getPluginManager().registerEvents(
             new BoatStandListener(boatStandManager), plugin);
+        Bukkit.getPluginManager().registerEvents(
+            new ReturnPointMarkerListener(returnPointManager), plugin);
     }
 
     public void startRecruit(Player organizer, int maxPlayers, boolean organizerParticipates,
@@ -178,16 +185,25 @@ public class BoatRaceManager {
             return;
         }
 
+        org.bukkit.Location returnPoint = returnPointManager.getReturnPoint(organizer);
+        if (returnPoint == null) {
+            organizer.sendMessage(MessageBuilder.error(
+                "リターンポイントを設置してください (/boatrace returnpoint)"));
+            return;
+        }
+
         activeRecruitSession.stop();
 
         activeRaceSession = new BoatRaceSession(
             plugin,
             currencyManager,
+            goalLineManager,
             activeRecruitSession.getParticipants(),
             activeRecruitSession.getSpectators(),
             organizer,
             goalLine,
             boatStandManager.getBoatStandLocations(organizer),
+            returnPoint,
             this::cleanupRaceSession
         );
 
@@ -240,6 +256,11 @@ public class BoatRaceManager {
     public void clearBoatStands(Player player) {
         boatStandManager.clearBoatStands(player);
         player.sendMessage(MessageBuilder.success("すべてのボートスタンドを削除しました"));
+    }
+
+    public void giveReturnPointMarker(Player player) {
+        player.getInventory().addItem(ReturnPointMarkerItem.create());
+        player.sendMessage(MessageBuilder.success("リターンポイントマーカーを取得しました"));
     }
 
     public boolean hasGoalLine(Player player) {

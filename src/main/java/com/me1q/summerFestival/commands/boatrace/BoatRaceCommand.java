@@ -21,7 +21,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
     private static final String[] SUB_COMMANDS = {"recruit", "join", "draw", "start", "stop",
         "getgoal",
-        "cleargoal", "getitemstand", "getboatstand", "clearboatstand", "help"};
+        "cleargoal", "getitemstand", "getboatstand", "clearboatstand", "returnpoint", "help"};
 
     private final BoatRaceManager gameManager;
 
@@ -44,6 +44,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
 
         if (args[0].equalsIgnoreCase("join")) {
             handleJoinCommand(player, args);
+            return true;
         }
 
         if (!player.isOp()) {
@@ -61,6 +62,7 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
             case "getitemstand" -> handleGetItemStandCommand(player);
             case "getboatstand" -> handleGetBoatStandCommand(player);
             case "clearboatstand" -> handleClearBoatStandCommand(player);
+            case "returnpoint" -> handleReturnPointCommand(player);
             case "help" -> showHelp(player);
             default -> {
                 player.sendMessage(MessageBuilder.error("不明なコマンド: " + args[0]));
@@ -155,6 +157,10 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         gameManager.clearBoatStands(player);
     }
 
+    private void handleReturnPointCommand(Player player) {
+        gameManager.giveReturnPointMarker(player);
+    }
+
     private void handleStopCommand(Player player) {
         gameManager.stopRace(player);
     }
@@ -170,6 +176,8 @@ public class BoatRaceCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(Component.text("/boatrace getboatstand - ボートスタンドマーカーを取得")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/boatrace clearboatstand - すべてのボートスタンドを削除")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/boatrace returnpoint - リターンポイントマーカーを取得")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(
             Component.text(
