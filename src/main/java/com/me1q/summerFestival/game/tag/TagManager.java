@@ -195,21 +195,53 @@ public class TagManager implements Listener {
             return;
         }
 
+        List<Player> targetPlayers = null;
+
         if (activeSession != null) {
-            List<Player> players = activeSession.getAllPlayers();
-            int teleportCount = 0;
+            targetPlayers = activeSession.getAllPlayers();
+        } else if (recruitSession != null) {
+            targetPlayers = recruitSession.getPlayers();
+        }
 
-            for (Player p : players) {
-                if (p.isOnline()) {
-                    p.teleport(returnPoint);
-                    teleportCount++;
-                }
+        if (targetPlayers == null || targetPlayers.isEmpty()) {
+            player.sendMessage(
+                MessageBuilder.error("テレポート対象のプレイヤーがいません"));
+            return;
+        }
+
+        int teleportCount = 0;
+        for (Player p : targetPlayers) {
+            if (p.isOnline()) {
+                p.teleport(returnPoint);
+                teleportCount++;
             }
+        }
 
-            player.sendMessage(MessageBuilder.success(
-                teleportCount + "人のプレイヤーをリターンポイントにテレポートしました"));
+        player.sendMessage(MessageBuilder.success(
+            teleportCount + "人のプレイヤーをリターンポイントにテレポートしました"));
+    }
+
+    public void removePlayerFromReturnPointTargets(Player executor) {
+        List<Player> removedPlayers = null;
+
+        if (activeSession != null) {
+            removedPlayers = List.copyOf(activeSession.getAllPlayers());
+            for (Player p : List.copyOf(removedPlayers)) {
+                activeSession.removePlayer(p);
+            }
+        } else if (recruitSession != null) {
+            removedPlayers = List.copyOf(recruitSession.getPlayers());
+            for (Player p : List.copyOf(removedPlayers)) {
+                recruitSession.removePlayer(p);
+            }
+        }
+
+        if (removedPlayers != null && !removedPlayers.isEmpty()) {
+            executor.sendMessage(MessageBuilder.success(
+                removedPlayers.size() + "人のプレイヤーをリターンポイント対象から削除しました"));
         } else {
-            player.sendMessage(MessageBuilder.error("アクティブなセッションがありません"));
+            executor.sendMessage(MessageBuilder.error(
+                "アクティブなセッションまたは募集がありません"));
         }
     }
 }
