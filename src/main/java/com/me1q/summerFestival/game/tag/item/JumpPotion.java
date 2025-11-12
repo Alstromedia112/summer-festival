@@ -25,7 +25,7 @@ public class JumpPotion {
                 Component.text("10秒間ジャンプ力が上昇する").color(NamedTextColor.GRAY)
             ).map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
             meta.clearCustomEffects();
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 10, 3), true);
+            meta.addCustomEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 20 * 10, 3), true);
             meta.setColor(Color.GREEN);
             potion.setItemMeta(meta);
         }
