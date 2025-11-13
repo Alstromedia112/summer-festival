@@ -5,10 +5,12 @@ import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.tag.constants.TagAnnouncement;
 import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
+import com.me1q.summerFestival.game.tag.item.TagItemUtil;
 import com.me1q.summerFestival.game.tag.item.listener.RedHelmetListener;
 import com.me1q.summerFestival.game.tag.player.Equipment;
 import com.me1q.summerFestival.game.tag.player.PlayerRole;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,8 @@ import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -179,6 +183,7 @@ public class TagSession {
         taggers.add(player);
         playerRoles.put(player, PlayerRole.TAGGER);
 
+        removeTagItems(player);
         Equipment.equipPlayer(player, PlayerRole.TAGGER);
 
         player.showTitle(Title.title(
@@ -197,6 +202,16 @@ public class TagSession {
             .append(Component.text(TagMessage.PLAYER_CAUGHT.text()).color(NamedTextColor.YELLOW)));
     }
 
+    private void removeTagItems(Player player) {
+        Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack item = inventory.getItem(i);
+            if (TagItemUtil.isTagItem(item)) {
+                inventory.setItem(i, null);
+            }
+        }
+    }
+
     private void playTouchSounds(Player tagger, Player victim) {
         victim.playSound(victim.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1.0f, 1.0f);
         tagger.playSound(tagger.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
@@ -209,6 +224,7 @@ public class TagSession {
         }
 
         showVictoryTitle(taggersWin);
+        showEscapedPlayers();
         playEffects();
         scheduleCleanup();
     }
@@ -226,6 +242,31 @@ public class TagSession {
                 Duration.ofMillis(1000)));
 
         getAllPlayers().forEach(p -> p.showTitle(victoryTitle));
+    }
+
+    private void showEscapedPlayers() {
+        if (runners.isEmpty()) {
+            return;
+        }
+
+        Component message = Component.text(TagMessage.ESCAPED_PLAYERS.text())
+            .color(NamedTextColor.GOLD);
+
+        List<Player> escapedPlayersList = new ArrayList<>(runners);
+        for (int i = 0; i < escapedPlayersList.size(); i++) {
+            Player escapedPlayer = escapedPlayersList.get(i);
+            Component playerName = Component.text(escapedPlayer.getName())
+                .color(NamedTextColor.AQUA);
+
+            message = message.append(playerName);
+
+            if (i < escapedPlayersList.size() - 1) {
+                message = message.append(Component.text(", ").color(NamedTextColor.GOLD));
+            }
+        }
+
+        Component finalMessage = message;
+        getAllPlayers().forEach(p -> p.sendMessage(finalMessage));
     }
 
     private void playEffects() {
@@ -247,7 +288,8 @@ public class TagSession {
 
     private void cleanup() {
         RedHelmetListener.cleanupAll();
-        getAllPlayers().forEach(Equipment::clearInventory);
+        taggers.forEach(Equipment::clearInventory);
+        getAllPlayers().forEach(this::removeTagItems);
     }
 
     private void broadcastMessage(Component message) {
@@ -255,7 +297,7 @@ public class TagSession {
     }
 
     public List<Player> getAllPlayers() {
-        List<Player> all = new java.util.ArrayList<>();
+        List<Player> all = new ArrayList<>();
         all.addAll(taggers);
         all.addAll(runners);
         return all;

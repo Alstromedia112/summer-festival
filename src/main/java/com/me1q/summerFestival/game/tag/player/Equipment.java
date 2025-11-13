@@ -45,6 +45,10 @@ public final class Equipment {
         savedHelmets.remove(player.getUniqueId());
     }
 
+    public static void clearTagItems(Player player) {
+
+    }
+
     public static void saveAndRemoveHelmet(Player player) {
         ItemStack helmet = player.getInventory().getHelmet();
         if (helmet != null && helmet.getType() != Material.AIR) {

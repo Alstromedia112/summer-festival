@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.me1q'
-version = '2.2.0'
+version = '3.0.1'
 
 repositories {
     mavenCentral()

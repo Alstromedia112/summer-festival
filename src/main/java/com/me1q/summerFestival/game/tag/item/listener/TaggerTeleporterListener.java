@@ -90,9 +90,9 @@ public class TaggerTeleporterListener implements Listener {
         Player tagger = nearbyTaggers.getFirst();
         tagger.teleport(returnPoint);
 
-        tagger.sendMessage(Component.text("テレポートされました!").color(NamedTextColor.RED));
+        tagger.sendMessage(Component.text("テレポートされた!").color(NamedTextColor.RED));
         player.sendMessage(MessageBuilder.success(
-            tagger.getName() + " をリターンポイントにテレポートしました"));
+            tagger.getName() + " をグラウンドにテレポートしました"));
 
         ItemStack mainhandItem = player.getInventory().getItemInMainHand();
         mainhandItem.setAmount(mainhandItem.getAmount() - 1);

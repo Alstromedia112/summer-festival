@@ -25,11 +25,12 @@ public class DarknessPotion {
                 Component.text("10秒間周囲が見えなくなる").color(NamedTextColor.GRAY)
             ).map(c -> c.decoration(TextDecoration.ITALIC, false)).toList());
             meta.clearCustomEffects();
-            meta.addCustomEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 10, 1), true);
+            meta.addCustomEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 10, 1), true);
             meta.setColor(Color.BLACK);
             potion.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(potion);
         return potion;
     }
 }

@@ -31,6 +31,7 @@ public class SpeedPotion {
             potion.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(potion);
         return potion;
     }
 }

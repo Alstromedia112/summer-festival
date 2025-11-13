@@ -1,5 +1,5 @@
 name: SummerFestival
-version: '2.2.0'
+version: '3.0.1'
 main: com.me1q.summerFestival.SummerFestival
 api-version: '1.21'
 description: 夏祭りをテーマにしたプラグイン
@@ -7,6 +7,10 @@ authors: [ me1q ]
 website: https://me1q.com
 
 commands:
+  summerfestival:
+    description: Main command
+    usage: /<command>
+    aliases: [ sf ]
   shooting:
     description: Manage shooting game
     usage: /<command> <start|stop|status|help>
@@ -25,6 +29,10 @@ commands:
   shop:
     description: Manage shop
     usage: /<command> <spawn|remove|open>
+  teleportbook:
+    description: Teleport book management
+    usage: /<command> [give|location|marker|reload|help]
+    aliases: [ tpbook, tb ]
 
 permissions:
   summerfestival.shooting:
@@ -53,4 +61,10 @@ permissions:
     default: op
   summerfestival.shop.admin:
     description: Permission to manage shop items
+    default: op
+  summerfestival.teleportbook:
+    description: Permission to use teleport book
+    default: true
+  summerfestival.teleportbook.admin:
+    description: Permission to manage teleport locations
     default: op

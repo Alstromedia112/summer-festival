@@ -50,7 +50,8 @@ public class BoatRaceRecruitSession {
     private void broadcastRecruitMessage() {
         Component message = MessageBuilder.separator()
             .append(Component.newline())
-            .append(Component.text("   ボートレース参加者募集中!").color(NamedTextColor.YELLOW)
+            .append(Component.text("   ボートレース参加者募集中! (Tキーを押して参加をクリック)")
+                .color(NamedTextColor.YELLOW)
                 .decorate(net.kyori.adventure.text.format.TextDecoration.BOLD))
             .append(Component.newline())
             .append(Component.text("   "))

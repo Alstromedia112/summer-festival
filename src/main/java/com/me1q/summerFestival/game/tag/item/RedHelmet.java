@@ -28,6 +28,7 @@ public class RedHelmet extends TagItemBase {
             redHelmet.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(redHelmet);
         return redHelmet;
     }
 

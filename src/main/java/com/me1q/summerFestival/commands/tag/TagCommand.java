@@ -5,8 +5,10 @@ import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.tag.TagManager;
 import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
+import com.me1q.summerFestival.game.tag.item.DarknessPotion;
 import com.me1q.summerFestival.game.tag.item.Decoy;
 import com.me1q.summerFestival.game.tag.item.InvisiblePotion;
+import com.me1q.summerFestival.game.tag.item.JumpPotion;
 import com.me1q.summerFestival.game.tag.item.RedHelmet;
 import com.me1q.summerFestival.game.tag.item.SlownessPotion;
 import com.me1q.summerFestival.game.tag.item.SmokeLauncher;
@@ -30,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 public class TagCommand implements CommandExecutor, TabCompleter {
 
     private static final String[] SUB_COMMANDS = {"recruit", "join", "start", "stop", "give",
-        "returnpoint", "tpreturn", "help"};
+        "returnpoint", "tpreturn", "remove", "help"};
 
     private final TagManager gameManager;
 
@@ -68,6 +70,7 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             case "give" -> handleGiveCommand(player, args);
             case "returnpoint" -> gameManager.giveReturnPointMarker(player);
             case "tpreturn" -> gameManager.teleportToReturnPoint(player);
+            case "remove" -> handleRemoveCommand(player, args);
             default -> sendUsage(player);
         }
 
@@ -135,6 +138,8 @@ public class TagCommand implements CommandExecutor, TabCompleter {
             case "potion_of_invisibility" -> item = InvisiblePotion.createItem();
             case "potion_of_speed" -> item = SpeedPotion.createItem();
             case "potion_of_slowness" -> item = SlownessPotion.createItem();
+            case "potion_of_jump" -> item = JumpPotion.createItem();
+            case "potion_of_darkness" -> item = DarknessPotion.createItem();
             case "decoy" -> item = Decoy.createItem();
             case "smoke_launcher" -> item = SmokeLauncher.createItem();
             case "tagger_detector" -> item = TaggerDetector.createItem();
@@ -145,6 +150,10 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         }
 
         player.getInventory().addItem(item);
+    }
+
+    private void handleRemoveCommand(Player player, String[] args) {
+        gameManager.removePlayerFromReturnPointTargets(player);
     }
 
     private void sendUsage(Player player) {
@@ -170,6 +179,8 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(Component.text("/tag returnpoint - リターンポイントマーカーを取得")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/tag tpreturn - 全プレイヤーをリターンポイントにTP")
+            .color(NamedTextColor.YELLOW));
+        player.sendMessage(Component.text("/tag remove - 全プレイヤーを対象から削除")
             .color(NamedTextColor.YELLOW));
         player.sendMessage(Component.text("/tag give <item> - アイテムを取得")
             .color(NamedTextColor.YELLOW));
@@ -206,6 +217,8 @@ public class TagCommand implements CommandExecutor, TabCompleter {
                 "potion_of_invisibility",
                 "potion_of_speed",
                 "potion_of_slowness",
+                "potion_of_jump",
+                "potion_of_darkness",
                 "decoy",
                 "smoke_launcher",
                 "tagger_detector",

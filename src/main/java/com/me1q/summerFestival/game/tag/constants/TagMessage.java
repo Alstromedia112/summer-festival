@@ -22,7 +22,8 @@ public enum TagMessage {
     GAME_END("GAME END"),
     TAGGER_WIN("✞ 鬼の勝利 ✞"),
     RUNNER_WIN("✞ 逃げ側の勝利 ✞"),
-    RECRUITMENT_HEADER("増え鬼参加者募集中！"),
+    ESCAPED_PLAYERS("逃げ切ったプレイヤー: "),
+    RECRUITMENT_HEADER("増え鬼参加者募集中！ (Tキーを押して参加をクリック)"),
     JOIN_BUTTON("[参加する]"),
     JOIN_BUTTON_HOVER("クリックして参加"),
     GAME_DURATION("ゲーム時間: ");

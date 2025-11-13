@@ -26,6 +26,7 @@ public class SmokeLauncher extends TagItemBase {
             windCharge.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(windCharge);
         return windCharge;
     }
 

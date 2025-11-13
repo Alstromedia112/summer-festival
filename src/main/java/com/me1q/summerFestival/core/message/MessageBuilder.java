@@ -1,6 +1,7 @@
 package com.me1q.summerFestival.core.message;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
@@ -43,7 +44,23 @@ public final class MessageBuilder {
         return Component.text(message)
             .color(color)
             .decorate(TextDecoration.BOLD)
-            .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand(command))
+            .clickEvent(ClickEvent.runCommand(command))
+            .hoverEvent(Component.text(hoverText).color(NamedTextColor.GRAY));
+    }
+
+    public static Component clickableURL(String message, NamedTextColor color, String url,
+        String hoverText) {
+        return Component.text(message)
+            .color(color)
+            .decorate(TextDecoration.BOLD)
+            .clickEvent(ClickEvent.openUrl(url))
+            .hoverEvent(Component.text(hoverText).color(NamedTextColor.GRAY));
+    }
+
+    public static Component hoverable(String message, NamedTextColor color, String hoverText) {
+        return Component.text(message)
+            .color(color)
+            .decorate(TextDecoration.BOLD)
             .hoverEvent(Component.text(hoverText).color(NamedTextColor.GRAY));
     }
 }

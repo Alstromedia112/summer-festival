@@ -26,6 +26,7 @@ public class TaggerDetector extends TagItemBase {
             detector.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(detector);
         return detector;
     }
 
