@@ -1,5 +1,6 @@
 package com.me1q.summerFestival;
 
+import com.me1q.summerFestival.commands.SummerFestivalCommand;
 import com.me1q.summerFestival.commands.boatrace.BoatRaceCommand;
 import com.me1q.summerFestival.commands.currency.CurrencyCommand;
 import com.me1q.summerFestival.commands.shooting.ShootingCommand;
@@ -23,6 +24,7 @@ public final class SummerFestival extends JavaPlugin {
     private ConfigManager configManager;
     private CurrencyManager currencyManager;
     private com.me1q.summerFestival.game.tag.TagManager tagManager;
+    private com.me1q.summerFestival.teleportbook.TeleportBookManager teleportBookManager;
 
     public static SummerFestival getInstance() {
         return JavaPlugin.getPlugin(SummerFestival.class);
@@ -40,17 +42,23 @@ public final class SummerFestival extends JavaPlugin {
         return tagManager;
     }
 
+    public com.me1q.summerFestival.teleportbook.TeleportBookManager getTeleportBookManager() {
+        return teleportBookManager;
+    }
+
     @Override
     public void onEnable() {
         configManager = new ConfigManager(this);
         currencyManager = new CurrencyManager();
         getServer().getPluginManager().registerEvents(currencyManager, this);
         getServer().getPluginManager().registerEvents(currencyManager.getMovementListener(), this);
+        registerSummerFestivalCommand();
         registerCurrencyCommand();
         registerShop();
         registerShootingGame();
         registerTagGame();
         registerBoatRaceGame();
+        registerTeleportBook();
         TagItemRegistrar.registerItems();
         BoatRaceItemRegistrar.registerItems();
         getLogger().info("Enabled SummerFestival Plugin.");
@@ -110,6 +118,14 @@ public final class SummerFestival extends JavaPlugin {
         }
     }
 
+    private void registerSummerFestivalCommand() {
+        SummerFestivalCommand summerFestivalCommand = new SummerFestivalCommand();
+        PluginCommand command = getCommand("summerfestival");
+        if (command != null) {
+            command.setExecutor(summerFestivalCommand);
+        }
+    }
+
     private void registerShop() {
         ShopItemManager itemManager = new ShopItemManager(this);
         ShopGUI shopGUI = new ShopGUI(this, itemManager);
@@ -125,6 +141,15 @@ public final class SummerFestival extends JavaPlugin {
         if (command != null) {
             command.setExecutor(shopCommand);
             command.setTabCompleter(shopCommand);
+        }
+    }
+
+    private void registerTeleportBook() {
+        teleportBookManager = new com.me1q.summerFestival.teleportbook.TeleportBookManager(this);
+        PluginCommand command = getCommand("teleportbook");
+        if (command != null) {
+            command.setExecutor(teleportBookManager.getCommand());
+            command.setTabCompleter(teleportBookManager.getCommand());
         }
     }
 }
