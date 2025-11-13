@@ -38,7 +38,7 @@ public class TeleportBookCommand implements TabExecutor {
                 return true;
             }
             player.getInventory().addItem(TeleportBookItem.createBook());
-            player.sendMessage(MessageBuilder.success("テレポートの本を入手しました。"));
+            player.sendMessage(MessageBuilder.success("旅の道しるべを入手しました。"));
             return true;
         }
 
@@ -69,8 +69,8 @@ public class TeleportBookCommand implements TabExecutor {
 
         target.getInventory().addItem(TeleportBookItem.createBook());
         sender.sendMessage(
-            MessageBuilder.success(target.getName() + " にテレポートの本を付与しました。"));
-        target.sendMessage(MessageBuilder.success("テレポートの本を入手しました。"));
+            MessageBuilder.success(target.getName() + " に旅の道しるべを付与しました。"));
+        target.sendMessage(MessageBuilder.success("旅の道しるべを入手しました。"));
     }
 
     private void handleLocation(CommandSender sender, String[] args) {
@@ -154,9 +154,9 @@ public class TeleportBookCommand implements TabExecutor {
 
     private void sendUsage(CommandSender sender) {
         sender.sendMessage(
-            Component.text("=== テレポートの本 コマンド ===").color(NamedTextColor.GOLD));
+            Component.text("=== 旅の道しるべ コマンド ===").color(NamedTextColor.GOLD));
         sender.sendMessage(
-            Component.text("/teleportbook - テレポートの本を入手").color(NamedTextColor.GREEN));
+            Component.text("/teleportbook - 旅の道しるべを入手").color(NamedTextColor.GREEN));
         sender.sendMessage(Component.text("/teleportbook give <player> - プレイヤーに本を付与")
             .color(NamedTextColor.GREEN));
         sender.sendMessage(Component.text("/teleportbook location add <name> - 地点追加")

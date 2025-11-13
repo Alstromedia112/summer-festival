@@ -26,6 +26,8 @@ public class TeleportBookManager {
             new TeleportBookListener(gui), plugin);
         plugin.getServer().getPluginManager().registerEvents(
             new TeleportGUIListener(locationManager, gui), plugin);
+        plugin.getServer().getPluginManager().registerEvents(
+            new com.me1q.summerFestival.teleportbook.listener.PlayerJoinListener(), plugin);
     }
 
     public TeleportBookCommand getCommand() {

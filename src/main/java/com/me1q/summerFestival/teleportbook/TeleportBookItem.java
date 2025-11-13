@@ -16,7 +16,7 @@ public class TeleportBookItem {
         ItemMeta meta = book.getItemMeta();
 
         if (meta != null) {
-            meta.displayName(Component.text("テレポートの本")
+            meta.displayName(Component.text("旅の道しるべ")
                 .color(NamedTextColor.AQUA)
                 .decoration(TextDecoration.ITALIC, false));
 
@@ -47,7 +47,7 @@ public class TeleportBookItem {
             return false;
         }
 
-        Component expectedName = Component.text("テレポートの本")
+        Component expectedName = Component.text("旅の道しるべ")
             .color(NamedTextColor.AQUA)
             .decoration(TextDecoration.ITALIC, false);
 
