@@ -5,10 +5,12 @@ import com.me1q.summerFestival.core.message.MessageBuilder;
 import com.me1q.summerFestival.game.tag.constants.TagAnnouncement;
 import com.me1q.summerFestival.game.tag.constants.TagConfig;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
+import com.me1q.summerFestival.game.tag.item.TagItemUtil;
 import com.me1q.summerFestival.game.tag.item.listener.RedHelmetListener;
 import com.me1q.summerFestival.game.tag.player.Equipment;
 import com.me1q.summerFestival.game.tag.player.PlayerRole;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,8 @@ import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -199,10 +203,10 @@ public class TagSession {
     }
 
     private void removeTagItems(Player player) {
-        org.bukkit.inventory.Inventory inventory = player.getInventory();
+        Inventory inventory = player.getInventory();
         for (int i = 0; i < inventory.getSize(); i++) {
-            org.bukkit.inventory.ItemStack item = inventory.getItem(i);
-            if (com.me1q.summerFestival.game.tag.item.TagItemUtil.isTagItem(item)) {
+            ItemStack item = inventory.getItem(i);
+            if (TagItemUtil.isTagItem(item)) {
                 inventory.setItem(i, null);
             }
         }
@@ -259,7 +263,7 @@ public class TagSession {
     private void cleanup() {
         RedHelmetListener.cleanupAll();
         taggers.forEach(Equipment::clearInventory);
-        runners.forEach(Equipment::clearHelmet);
+        getAllPlayers().forEach(this::removeTagItems);
     }
 
     private void broadcastMessage(Component message) {
@@ -267,7 +271,7 @@ public class TagSession {
     }
 
     public List<Player> getAllPlayers() {
-        List<Player> all = new java.util.ArrayList<>();
+        List<Player> all = new ArrayList<>();
         all.addAll(taggers);
         all.addAll(runners);
         return all;
