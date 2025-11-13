@@ -69,7 +69,7 @@ public class TagManager implements Listener {
             return;
         }
 
-        recruitSession = new TagRecruitSession(starter, duration);
+        recruitSession = new TagRecruitSession(starter, duration, returnPointManager);
         recruitSession.start();
     }
 

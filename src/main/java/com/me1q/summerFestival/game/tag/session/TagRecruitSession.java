@@ -1,6 +1,7 @@
 package com.me1q.summerFestival.game.tag.session;
 
 import com.me1q.summerFestival.core.message.MessageBuilder;
+import com.me1q.summerFestival.game.boatrace.returnpoint.ReturnPointManager;
 import com.me1q.summerFestival.game.tag.constants.TagMessage;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -16,10 +18,13 @@ public class TagRecruitSession {
 
     private final Set<Player> players;
     private final int gameDuration;
+    private final ReturnPointManager returnPointManager;
     private boolean active;
 
-    public TagRecruitSession(Player starter, int gameDuration) {
+    public TagRecruitSession(Player starter, int gameDuration,
+        ReturnPointManager returnPointManager) {
         this.gameDuration = gameDuration;
+        this.returnPointManager = returnPointManager;
         this.players = new HashSet<>();
         this.active = false;
         players.add(starter);
@@ -65,7 +70,20 @@ public class TagRecruitSession {
         player.sendMessage(MessageBuilder.success(TagMessage.PLAYER_JOINED.text()));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
+        teleportToReturnPoint(player);
         broadcastParticipantJoined(player);
+    }
+
+    private void teleportToReturnPoint(Player player) {
+        Location returnPoint = returnPointManager.getReturnPoint();
+
+        if (returnPoint == null) {
+            player.sendMessage(MessageBuilder.warning("リターンポイントが設定されていません"));
+            return;
+        }
+
+        player.teleport(returnPoint);
+        player.sendMessage(MessageBuilder.success("リターンポイントにテレポートしました"));
     }
 
     private void broadcastParticipantJoined(Player player) {
