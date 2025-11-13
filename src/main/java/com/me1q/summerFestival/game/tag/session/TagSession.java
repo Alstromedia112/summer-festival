@@ -179,6 +179,7 @@ public class TagSession {
         taggers.add(player);
         playerRoles.put(player, PlayerRole.TAGGER);
 
+        removeTagItems(player);
         Equipment.equipPlayer(player, PlayerRole.TAGGER);
 
         player.showTitle(Title.title(
@@ -195,6 +196,16 @@ public class TagSession {
 
         broadcastMessage(Component.text(player.getName()).color(NamedTextColor.RED)
             .append(Component.text(TagMessage.PLAYER_CAUGHT.text()).color(NamedTextColor.YELLOW)));
+    }
+
+    private void removeTagItems(Player player) {
+        org.bukkit.inventory.Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getSize(); i++) {
+            org.bukkit.inventory.ItemStack item = inventory.getItem(i);
+            if (com.me1q.summerFestival.game.tag.item.TagItemUtil.isTagItem(item)) {
+                inventory.setItem(i, null);
+            }
+        }
     }
 
     private void playTouchSounds(Player tagger, Player victim) {
@@ -247,7 +258,8 @@ public class TagSession {
 
     private void cleanup() {
         RedHelmetListener.cleanupAll();
-        getAllPlayers().forEach(Equipment::clearInventory);
+        taggers.forEach(Equipment::clearInventory);
+        runners.forEach(Equipment::clearHelmet);
     }
 
     private void broadcastMessage(Component message) {

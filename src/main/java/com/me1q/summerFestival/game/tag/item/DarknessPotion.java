@@ -30,6 +30,7 @@ public class DarknessPotion {
             potion.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(potion);
         return potion;
     }
 }

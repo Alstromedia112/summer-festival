@@ -27,6 +27,7 @@ public class TaggerTeleporter extends TagItemBase {
             teleporter.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(teleporter);
         return teleporter;
     }
 

@@ -30,6 +30,7 @@ public class JumpPotion {
             potion.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(potion);
         return potion;
     }
 }

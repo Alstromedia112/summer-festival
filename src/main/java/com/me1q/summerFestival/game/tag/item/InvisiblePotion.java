@@ -30,6 +30,7 @@ public class InvisiblePotion {
             potion.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(potion);
         return potion;
     }
 }

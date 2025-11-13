@@ -26,6 +26,7 @@ public class Decoy extends TagItemBase {
             playerHead.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(playerHead);
         return playerHead;
 
     }

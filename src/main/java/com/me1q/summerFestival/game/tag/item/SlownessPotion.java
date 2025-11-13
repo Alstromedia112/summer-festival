@@ -30,6 +30,7 @@ public class SlownessPotion {
             potion.setItemMeta(meta);
         }
 
+        TagItemUtil.markAsTagItem(potion);
         return potion;
     }
 }
