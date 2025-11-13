@@ -224,6 +224,7 @@ public class TagSession {
         }
 
         showVictoryTitle(taggersWin);
+        showEscapedPlayers();
         playEffects();
         scheduleCleanup();
     }
@@ -241,6 +242,31 @@ public class TagSession {
                 Duration.ofMillis(1000)));
 
         getAllPlayers().forEach(p -> p.showTitle(victoryTitle));
+    }
+
+    private void showEscapedPlayers() {
+        if (runners.isEmpty()) {
+            return;
+        }
+
+        Component message = Component.text(TagMessage.ESCAPED_PLAYERS.text())
+            .color(NamedTextColor.GOLD);
+
+        List<Player> escapedPlayersList = new ArrayList<>(runners);
+        for (int i = 0; i < escapedPlayersList.size(); i++) {
+            Player escapedPlayer = escapedPlayersList.get(i);
+            Component playerName = Component.text(escapedPlayer.getName())
+                .color(NamedTextColor.AQUA);
+
+            message = message.append(playerName);
+
+            if (i < escapedPlayersList.size() - 1) {
+                message = message.append(Component.text(", ").color(NamedTextColor.GOLD));
+            }
+        }
+
+        Component finalMessage = message;
+        getAllPlayers().forEach(p -> p.sendMessage(finalMessage));
     }
 
     private void playEffects() {
